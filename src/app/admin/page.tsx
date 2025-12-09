@@ -5,4 +5,4 @@ export default function AdminPage() {
         <h1>Admin</h1>
         </>
     )
-}
+}   
