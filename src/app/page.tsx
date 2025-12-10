@@ -59,9 +59,9 @@ export default function Home() {
   const year = new Date().getFullYear();
 
   return (
-    <AuroraBackground className="px-4">
-      <Navbar className="absolute top-0 left-0 right-0 z-10 px-6" />
-      <div className="relative flex h-full w-full max-w-6xl flex-col">
+    <AuroraBackground className="px-2 sm:px-4">
+      <Navbar className="absolute top-0 left-0 right-0 z-10 px-3 sm:px-6" />
+      <div className="relative flex h-full w-full max-w-7xl mx-auto flex-col">
         <motion.div
           initial={{ opacity: 0.0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -70,13 +70,13 @@ export default function Home() {
             duration: 0.8,
             ease: "easeInOut",
           }}
-          className="relative flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center"
+          className="relative flex flex-1 flex-col items-center justify-center gap-4 sm:gap-6 px-3 sm:px-6 text-center"
         >
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-            className="text-4xl font-semibold text-emerald-900 drop-shadow-sm sm:text-6xl md:text-7xl"
+            className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-emerald-900 drop-shadow-sm"
           >
             Welcome to
           </motion.p>
@@ -84,7 +84,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-            className="text-5xl font-extrabold leading-tight text-[#b56918] drop-shadow sm:text-7xl md:text-8xl"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight text-[#b56918] drop-shadow"
           >
             Igire Rwanda
           </motion.h1>
@@ -92,7 +92,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-            className="text-xl font-medium text-emerald-900/80 sm:text-2xl md:text-3xl"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-emerald-900/80"
           >
             Application Portal
           </motion.p>
@@ -100,7 +100,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
-            className="mt-4 rounded-full bg-[#2f573d] px-8 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-900/10 transition hover:scale-[1.02] hover:shadow-emerald-900/20"
+            className="mt-4 rounded-full bg-[#2f573d] px-6 py-2.5 sm:px-8 sm:py-3 text-base sm:text-lg font-semibold text-white shadow-lg shadow-emerald-900/10 transition hover:scale-[1.02] hover:shadow-emerald-900/20"
           >
             Apply Now
           </motion.button>
