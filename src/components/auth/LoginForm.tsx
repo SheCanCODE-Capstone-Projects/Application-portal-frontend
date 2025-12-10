@@ -146,7 +146,6 @@ export default function LoginForm() {
             )}
           </div>
 
-          {/* Remember Me + Forgot Password */}
           <div className="flex items-center justify-between text-sm">
             <label className="inline-flex items-center gap-2 text-[#0d2f20]">
               <input
