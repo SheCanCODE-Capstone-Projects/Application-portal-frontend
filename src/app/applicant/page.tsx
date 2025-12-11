@@ -1,4 +1,5 @@
 export default function ApplicantPage() {
+   import PersonalInfoStep from "./components/PersonalInfoStep" 
 
     return (
         <>
