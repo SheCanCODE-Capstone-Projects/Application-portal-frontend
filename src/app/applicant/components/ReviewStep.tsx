@@ -51,6 +51,7 @@ const ReviewStep: React.FC<StepProps> = ({ formData, onBack }) => {
 
   return (
     <div className="space-y-6">
+      {/* Personal Information */}
       <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
         <h3 className="font-semibold text-gray-900 mb-4 text-lg">Personal Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -75,6 +76,7 @@ const ReviewStep: React.FC<StepProps> = ({ formData, onBack }) => {
         </div>
       </div>
 
+      {/* Education */}
       <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
         <h3 className="font-semibold text-gray-900 mb-4 text-lg">Education</h3>
         {formData.education.map((edu, index) => (
@@ -101,24 +103,77 @@ const ReviewStep: React.FC<StepProps> = ({ formData, onBack }) => {
         ))}
       </div>
 
-       <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-4">Work Experience</h3>
-                {formData.workExperience.map((work, index) => (
-                  <div key={index} className="mb-4 last:mb-0">
-                    <p className="text-sm"><span className="font-medium">Company:</span> {work.company}</p>
-                    <p className="text-sm"><span className="font-medium">Position:</span> {work.position}</p>
-                    <p className="text-sm"><span className="font-medium">Duration:</span> {work.duration}</p>
-                  </div>
-                ))}
-              </div>
+      {/* Work Experience */}
+      <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
+        <h3 className="font-semibold text-gray-900 mb-4 text-lg">Work Experience</h3>
+        {formData.workExperience.map((work, index) => (
+          <div key={index} className="mb-4 last:mb-0 pb-4 last:pb-0 border-b last:border-b-0">
+            <p className="text-sm mb-1">
+              <span className="font-medium text-gray-700">Company:</span>{' '}
+              <span className="text-gray-600">{work.company}</span>
+            </p>
+            <p className="text-sm mb-1">
+              <span className="font-medium text-gray-700">Position:</span>{' '}
+              <span className="text-gray-600">{work.position}</span>
+            </p>
+            <p className="text-sm mb-1">
+              <span className="font-medium text-gray-700">Duration:</span>{' '}
+              <span className="text-gray-600">{work.duration}</span>
+            </p>
+            <p className="text-sm">
+              <span className="font-medium text-gray-700">Responsibilities:</span>{' '}
+              <span className="text-gray-600">{work.responsibilities}</span>
+            </p>
+          </div>
+        ))}
+      </div>
 
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-4">Documents</h3>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">CV:</span> {formData.cv?.name || 'Not uploaded'}</p>
-                  <p><span className="font-medium">Cover Letter:</span> {formData.coverLetter?.name || 'Not uploaded'}</p>
-                  <p><span className="font-medium">Certificates:</span> {formData.certificates.length} file(s)</p>
-                </div>
-              </div>
-            </div>
+      {/* Documents */}
+      <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
+        <h3 className="font-semibold text-gray-900 mb-4 text-lg">Documents</h3>
+        <div className="space-y-2 text-sm">
+          <p>
+            <span className="font-medium text-gray-700">CV:</span>{' '}
+            <span className="text-gray-600">{formData.cv?.name || 'Not uploaded'}</span>
+          </p>
+          <p>
+            <span className="font-medium text-gray-700">Cover Letter:</span>{' '}
+            <span className="text-gray-600">{formData.coverLetter?.name || 'Not uploaded'}</span>
+          </p>
+          <p>
+            <span className="font-medium text-gray-700">Certificates:</span>{' '}
+            <span className="text-gray-600">{formData.certificates.length} file(s)</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isSubmitting}
+          className="px-6 py-3 text-emerald-700 font-medium hover:bg-emerald-50 rounded-lg transition disabled:opacity-50"
+        >
+          Back
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="px-8 py-3 bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              Submitting...
+            </>
+          ) : (
+            'Submit Application'
           )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ReviewStep;
