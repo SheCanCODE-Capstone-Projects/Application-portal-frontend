@@ -84,7 +84,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight text-[#b56918] drop-shadow"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-tight text-[#b56918] drop-shadow"
           >
             Igire Rwanda
           </motion.h1>
@@ -92,7 +92,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-emerald-900/80"
+            className="text-2xl sm:text-xl md:text-2xl lg:text-3xl font-medium text-emerald-900/80"
           >
             Application Portal
           </motion.p>
