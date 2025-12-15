@@ -13,7 +13,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
       <div className="flex items-center justify-between h-full">
         {/* Mobile Menu Button & Search */}
         <div className="flex items-center space-x-4 flex-1">
-
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <Menu className="w-6 h-6 text-gray-600" />
+          </button>
 
           {/* Search Bar */}
           <div className="hidden md:flex items-center flex-1 max-w-md">
