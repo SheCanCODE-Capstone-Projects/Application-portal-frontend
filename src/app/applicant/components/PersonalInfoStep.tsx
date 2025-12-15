@@ -21,10 +21,11 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             First name <span className="text-red-500">*</span>
           </label>
           <input
@@ -32,13 +33,13 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
             name="firstName"
             value={formData.personalInfo.firstName}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
             placeholder="First name"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             Last name <span className="text-red-500">*</span>
           </label>
           <input
@@ -46,15 +47,16 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
             name="lastName"
             value={formData.personalInfo.lastName}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
             placeholder="Last name"
             required
           />
         </div>
       </div>
 
+      {/* Email */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
           Email <span className="text-red-500">*</span>
         </label>
         <input
@@ -62,14 +64,15 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           name="email"
           value={formData.personalInfo.email}
           onChange={handleInputChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
           placeholder="your.email@example.com"
           required
         />
       </div>
 
+      {/* Phone */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
           Phone <span className="text-red-500">*</span>
         </label>
         <input
@@ -77,14 +80,15 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           name="phone"
           value={formData.personalInfo.phone}
           onChange={handleInputChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
           placeholder="+250 123 456 789"
           required
         />
       </div>
 
+      {/* Address */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
           Address <span className="text-red-500">*</span>
         </label>
         <textarea
@@ -92,19 +96,20 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           value={formData.personalInfo.address}
           onChange={handleInputChange}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none"
           placeholder="Your full address"
           required
         />
       </div>
 
-      <div className="flex justify-end pt-6 border-t border-gray-200">
+      {/* Navigation */}
+      <div className="flex justify-end pt-4 sm:pt-6 border-t border-gray-200">
         <button
           type="submit"
-          className="px-8 py-3 bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition flex items-center gap-2"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-emerald-700 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-emerald-800 transition flex items-center justify-center gap-2"
         >
           Next
-          <ChevronRight size={20} />
+          <ChevronRight size={18} className="sm:w-5 sm:h-5" />
         </button>
       </div>
     </form>

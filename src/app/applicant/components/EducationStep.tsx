@@ -35,59 +35,72 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {formData.education.map((edu, index) => (
-        <div key={index} className="p-4 md:p-6 border border-gray-200 rounded-lg relative">
+        <div key={index} className="p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg relative">
+          {/* Remove Button */}
           {formData.education.length > 1 && (
             <button
               type="button"
               onClick={() => removeEducation(index)}
-              className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 transition p-1"
+              aria-label="Remove education"
             >
-              <X size={20} />
+              <X size={18} className="sm:w-5 sm:h-5" />
             </button>
           )}
-          <h3 className="font-semibold text-gray-700 mb-4">Education {index + 1}</h3>
-          <div className="space-y-4">
+          
+          <h3 className="font-semibold text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 pr-8">
+            Education {index + 1}
+          </h3>
+          
+          <div className="space-y-3 sm:space-y-4">
+            {/* Institution */}
             <input
               type="text"
               value={edu.name}
               onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
               placeholder="Institution name"
               required
             />
+            
+            {/* Degree */}
             <input
               type="text"
               value={edu.degree}
               onChange={(e) => handleInputChange(index, 'degree', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-              placeholder="Degree (e.g., Bachelor of Science)"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              placeholder="Degree"
               required
             />
+            
+            {/* Grade */}
             <input
               type="text"
               value={edu.grade}
               onChange={(e) => handleInputChange(index, 'grade', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-              placeholder="Grade/GPA (e.g., 3.8/4.0)"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              placeholder="Grade/GPA"
               required
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <input
                 type="text"
                 value={edu.startDate}
                 onChange={(e) => handleInputChange(index, 'startDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                placeholder="Start date (e.g., Jan 2020)"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+                placeholder="Start date"
                 required
               />
               <input
                 type="text"
                 value={edu.endDate}
                 onChange={(e) => handleInputChange(index, 'endDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                placeholder="End date (e.g., Dec 2024)"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+                placeholder="End date"
                 required
               />
             </div>
@@ -95,28 +108,30 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
         </div>
       ))}
 
+      {/* Add Button */}
       <button
         type="button"
         onClick={addEducation}
-        className="w-full py-3 border-2 border-dashed border-emerald-300 text-emerald-700 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition font-medium"
+        className="w-full py-2.5 sm:py-3 text-sm sm:text-base border-2 border-dashed border-emerald-300 text-emerald-700 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition font-medium"
       >
         + Add Another Education
       </button>
 
-      <div className="flex justify-between pt-6 border-t border-gray-200">
+      {/* Navigation */}
+      <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 sm:gap-0 pt-4 sm:pt-6 border-t border-gray-200">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-3 text-emerald-700 font-medium hover:bg-emerald-50 rounded-lg transition"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-emerald-700 font-medium hover:bg-emerald-50 rounded-lg transition"
         >
           Back
         </button>
         <button
           type="submit"
-          className="px-8 py-3 bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition flex items-center gap-2"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition flex items-center justify-center gap-2"
         >
           Next
-          <ChevronRight size={20} />
+          <ChevronRight size={18} className="sm:w-5 sm:h-5" />
         </button>
       </div>
     </form>
