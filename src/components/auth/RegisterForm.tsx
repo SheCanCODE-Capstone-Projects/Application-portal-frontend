@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { FaGoogle } from "react-icons/fa";
 import { registerUser } from "@/lib/api";
 
 type FieldErrors = {
@@ -446,17 +447,33 @@ export default function RegisterForm() {
               {isSubmitting ? "Creating Account..." : "Create Account"}
             </button>
           </div>
+
+          <div className="mt-6 text-center text-sm">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="font-semibold text-[#d97700] hover:text-[#b35f00]"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
+            >
+              <FaGoogle className="h-4 w-4 text-[#DB4437]" />
+              <span>Continue with Google</span>
+            </button>
+          </div>
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="font-semibold text-[#d97700] hover:text-[#b35f00]"
-            >
-              Sign in
-            </Link>
+          <p className="mt-2 text-sm text-[#3f3f3f]">
+            Create your account to get started
           </p>
         </div>
       </div>

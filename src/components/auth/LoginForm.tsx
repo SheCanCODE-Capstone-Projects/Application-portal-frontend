@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
-
+import { FaGoogle } from "react-icons/fa";
 import { loginRequest } from "@/lib/api";
 
 type FieldErrors = {
@@ -180,6 +180,27 @@ export default function LoginForm() {
             {isSubmitting ? "Signing in..." : "Login"}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          
+          <div className="mt-6">
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
+            >
+              <FaGoogle className="h-4 w-4 text-[#DB4437]" />
+              <span>Continue with Google</span>
+            </button>
+          </div>
+        </div>
 
         <div className="mt-6 text-center text-sm text-[#0d2f20]">
           Don’t have an account?{" "}

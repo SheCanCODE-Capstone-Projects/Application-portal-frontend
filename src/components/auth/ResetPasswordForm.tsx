@@ -303,7 +303,7 @@ export default function ResetPasswordForm() {
             Remember your password?{" "}
             <Link
               href="/auth/login"
-              className="font-medium text-[#0f5d3f] hover:text-[#0d4e35]"
+              className="font-semibold text-[#d97700] hover:text-[#b35f00]"
             >
               Sign in
             </Link>
