@@ -1,15 +1,11 @@
+// src/app/admin/layout.tsx
+import AdminSidebar from '@/components/admin/Sidebar';
 export default function AdminLayout({
-                                        children,
-                                    }: {
-    children: React.ReactNode;
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return (
-        <>
-
-            <main className="min-h-screen">
-                {children}
-            </main>
-
-        </>
-    );
+  return (
+    <AdminSidebar/>
+  );
 }
