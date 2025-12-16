@@ -60,7 +60,7 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
               type="text"
               value={edu.name}
               onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Institution name"
               required
             />
@@ -70,7 +70,7 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
               type="text"
               value={edu.degree}
               onChange={(e) => handleInputChange(index, 'degree', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Degree"
               required
             />
@@ -80,7 +80,7 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
               type="text"
               value={edu.grade}
               onChange={(e) => handleInputChange(index, 'grade', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Grade/GPA"
               required
             />
@@ -91,7 +91,7 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
                 type="text"
                 value={edu.startDate}
                 onChange={(e) => handleInputChange(index, 'startDate', e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
                 placeholder="Start date"
                 required
               />
@@ -99,7 +99,7 @@ const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, 
                 type="text"
                 value={edu.endDate}
                 onChange={(e) => handleInputChange(index, 'endDate', e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
                 placeholder="End date"
                 required
               />

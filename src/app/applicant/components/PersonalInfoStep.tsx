@@ -33,7 +33,7 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
             name="firstName"
             value={formData.personalInfo.firstName}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
             placeholder="First name"
             required
           />
@@ -47,7 +47,7 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
             name="lastName"
             value={formData.personalInfo.lastName}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+            className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
             placeholder="Last name"
             required
           />
@@ -64,7 +64,7 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           name="email"
           value={formData.personalInfo.email}
           onChange={handleInputChange}
-          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
           placeholder="your.email@example.com"
           required
         />
@@ -80,7 +80,7 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           name="phone"
           value={formData.personalInfo.phone}
           onChange={handleInputChange}
-          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
           placeholder="+250 123 456 789"
           required
         />
@@ -96,7 +96,7 @@ const PersonalInfoStep: React.FC<StepProps> = ({ formData, updateFormData, onNex
           value={formData.personalInfo.address}
           onChange={handleInputChange}
           rows={3}
-          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none"
+          className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none placeholder:text-gray-400"
           placeholder="Your full address"
           required
         />

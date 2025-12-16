@@ -60,7 +60,7 @@ const WorkExperienceStep: React.FC<StepProps> = ({ formData, updateFormData, onN
               type="text"
               value={work.company}
               onChange={(e) => handleInputChange(index, 'company', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Company name"
               required
             />
@@ -70,7 +70,7 @@ const WorkExperienceStep: React.FC<StepProps> = ({ formData, updateFormData, onN
               type="text"
               value={work.position}
               onChange={(e) => handleInputChange(index, 'position', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Position"
               required
             />
@@ -80,7 +80,7 @@ const WorkExperienceStep: React.FC<StepProps> = ({ formData, updateFormData, onN
               type="text"
               value={work.duration}
               onChange={(e) => handleInputChange(index, 'duration', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
               placeholder="Duration (e.g., Jan 2020 - Dec 2022)"
               required
             />
@@ -90,7 +90,7 @@ const WorkExperienceStep: React.FC<StepProps> = ({ formData, updateFormData, onN
               value={work.responsibilities}
               onChange={(e) => handleInputChange(index, 'responsibilities', e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition resize-none placeholder:text-gray-400"
               placeholder="Key responsibilities"
               required
             />
