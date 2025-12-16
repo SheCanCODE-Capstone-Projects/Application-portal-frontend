@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -47,6 +46,17 @@ export default function ApplicantPage() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const getStepTitle = () => {
+    const titles = [
+      'Personal Information',
+      'Education Background',
+      'Work Experience',
+      'Documents Upload',
+      'Review & Confirm',
+    ];
+    return titles[currentStep - 1];
+  };
+
   const renderStep = () => {
     const stepProps = {
       formData,
@@ -72,17 +82,33 @@ export default function ApplicantPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        <ProgressStepper currentStep={currentStep} steps={steps} />
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 md:py-8 px-3 sm:px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Single Continuous Card */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          {/* Header with Title */}
+          <div className="px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+              Registration
+            </h1>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Registration</h1>
-          <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-6">
-            {steps[currentStep - 1].title} {currentStep > 1 && currentStep < 5 ? 'Background' : currentStep === 4 ? 'Upload' : currentStep === 5 ? '& Confirm' : 'Information'}
-          </h2>
+          {/* Progress Stepper */}
+          <div className="px-4 sm:px-6 md:px-8 py-6 sm:py-8">
+            <ProgressStepper currentStep={currentStep} steps={steps} />
+          </div>
 
-          {renderStep()}
+          {/* Form Content */}
+          <div className="px-4 sm:px-6 md:px-8 pb-6 sm:pb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              {getStepTitle()}
+            </h2>
+            <p className="text-sm sm:text-base text-gray-500 mb-6">
+              Please fill in the required information below.
+            </p>
+
+            {renderStep()}
+          </div>
         </div>
       </div>
     </div>
