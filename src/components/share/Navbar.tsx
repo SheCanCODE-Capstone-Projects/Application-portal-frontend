@@ -26,4 +26,3 @@ export const Navbar = ({ className }: NavbarProps) => {
     </header>
   );
 };
-
