@@ -12,7 +12,7 @@ export const Navbar = ({ className }: NavbarProps) => {
     <header className={cn("flex items-center justify-between gap-2 sm:gap-4 py-4 sm:py-6", className)}>
       <div></div>
       <div className="flex items-center">
-        <div className="relative h-16 w-16 sm:h-18 sm:w-18 md:h-20 md:w-20 overflow-hidden rounded-full bg-white/80 shadow-lg shadow-emerald-900/10 ring-2 sm:ring-3 ring-white/60 backdrop-blur">
+        <div className="relative h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 overflow-hidden rounded-full bg-white/80 shadow-lg shadow-emerald-900/10 ring-2 sm:ring-3 ring-white/60 backdrop-blur">
           <Image
             src="/log.jpeg"
             alt="Logo"
