@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
-import { FaGoogle } from "react-icons/fa";
 import { loginRequest } from "@/lib/api";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
 type FieldErrors = {
   email?: string;
@@ -88,7 +88,7 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f1ed] px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8]">
         <div className="mb-8 text-center">
           <h1 className="mt-3 text-3xl font-semibold text-[#0f5d3f]">
@@ -194,9 +194,9 @@ export default function LoginForm() {
           <div className="mt-6">
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
+              className="flex w-full items-center justify-center gap-2 rounded-full shadow-amber-50 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
             >
-              <FaGoogle className="h-4 w-4 text-[#DB4437]" />
+              <GoogleIcon className="h-8 w-8" />
               <span>Continue with Google</span>
             </button>
           </div>
