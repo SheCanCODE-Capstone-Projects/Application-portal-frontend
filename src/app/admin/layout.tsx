@@ -1,15 +1,12 @@
+// src/app/admin/layout.tsx
 export default function AdminLayout({
-                                        children,
-                                    }: {
-    children: React.ReactNode;
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return (
-        <>
-
-            <main className="min-h-screen">
-                {children}
-            </main>
-
-        </>
-    );
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {children}
+    </div>
+  );
 }
