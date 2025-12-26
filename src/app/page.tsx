@@ -7,6 +7,7 @@ import { Footer } from "@/components/share/Footer";
 import { Navbar } from "@/components/share/Navbar";
 import LoginForm from "@/components/auth/LoginForm";
 import { X } from "lucide-react";
+import AuthSwitcher from "@/app/auth/AuthSwitcher/AuthSwitcher";
 
 interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
   children: ReactNode;
@@ -152,7 +153,7 @@ export default function Home() {
                   </button>
 
 
-                  <LoginForm />
+                      <AuthSwitcher />
                 </motion.div>
               </motion.div>
           )}

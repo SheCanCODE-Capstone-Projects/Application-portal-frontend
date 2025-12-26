@@ -1,10 +1,6 @@
-import { Metadata } from 'next';
-import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Reset Password | SheCanCODE",
-  description: "Reset your SheCanCODE account password",
-};
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 export default function ResetPasswordPage() {
   return <ResetPasswordForm />;

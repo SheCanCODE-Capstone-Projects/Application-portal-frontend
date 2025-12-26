@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { forgotPassword } from "@/lib/api";
+import {useAuth} from "@/app/context/AuthContext";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -11,6 +12,7 @@ export default function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setView } = useAuth()
 
   const validate = (): boolean => {
     if (!email) {
@@ -37,8 +39,12 @@ export default function ForgotPasswordForm() {
     try {
       await forgotPassword(email);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset link. Please try again.");
+    } catch (err: unknown) {
+      if(err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("failed to send reset link. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -69,7 +75,7 @@ export default function ForgotPasswordForm() {
               Check Your Email
             </h2>
             <p className="mt-2 text-gray-600">
-              We've sent a password reset link to <strong>{email}</strong>. 
+              We&#39;ve sent a password reset link to <strong>{email}</strong>.
               Please check your inbox and follow the instructions to reset your password.
             </p>
           </div>
@@ -87,14 +93,14 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f1ed] px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8]">
         <div className="mb-8 text-center">
           <h1 className="mt-3 text-3xl font-semibold text-[#0f5d3f]">
             Forgot Password
           </h1>
           <p className="mt-2 text-sm text-[#3f3f3f]">
-            Enter your email and we'll send you a link to reset your password
+            Enter your email and we&#39;ll send you a link to reset your password
           </p>
         </div>
 
@@ -164,12 +170,12 @@ export default function ForgotPasswordForm() {
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Remember your password?{" "}
-            <Link
-              href="/auth/login"
+            <button
+              onClick={() => setView("login")}
               className="font-semibold text-[#d97700] hover:text-[#b35f00]"
             >
               Sign in
-            </Link>
+            </button>
           </p>
         </div>
       </div>
