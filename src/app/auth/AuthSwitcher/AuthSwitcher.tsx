@@ -22,5 +22,7 @@ function AuthSwitcherContent() {
             {view === "register" && <RegisterForm />}
             {view === "forgot" && <ForgotPasswordForm />}
         </>
+
+
     );
 }

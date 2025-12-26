@@ -5,7 +5,6 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/share/Footer";
 import { Navbar } from "@/components/share/Navbar";
-import LoginForm from "@/components/auth/LoginForm";
 import { X } from "lucide-react";
 import AuthSwitcher from "@/app/auth/AuthSwitcher/AuthSwitcher";
 
