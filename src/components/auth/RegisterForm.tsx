@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { FaGoogle } from "react-icons/fa";
 import { registerUser } from "@/lib/api";
+import {GoogleIcon} from "@/components/icons/GoogleIcon";
+import {useAuth} from "@/app/context/AuthContext";
 
 type FieldErrors = {
   email?: string;
@@ -15,6 +15,7 @@ type FieldErrors = {
   phone?: string;
 };
 
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordMinLength = 8;
 
@@ -24,7 +25,9 @@ const hasLowercase = (value: string) => /[a-z]/.test(value);
 const hasSpecialChar = (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
 export default function RegisterForm() {
-  const router = useRouter();
+  const {setView} = useAuth();
+  // const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -127,19 +130,19 @@ export default function RegisterForm() {
     try {
       const { confirmPassword, ...registrationData } = formData;
       await registerUser(registrationData);
-      
-      // Show success message and redirect to login after a delay
+
       setRegistrationSuccess(true);
-      
-      // Redirect to login after 3 seconds
+
       setTimeout(() => {
-        router.push("/auth/login");
+        setView("login")
       }, 3000);
-      
-    } catch (error: any) {
-      setFormError(
-        error.message || "Registration failed. Please try again later."
-      );
+
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("failed to register  Pleas try again ")
+    }
     } finally {
       setIsSubmitting(false);
     }
@@ -147,7 +150,7 @@ export default function RegisterForm() {
 
   if (registrationSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f1ed] px-4 py-10">
+      <div className="flex min-h-screen items-center justify-center px-4 py-10">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-[#d7cfc8]">
           <div className="mb-6">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -170,7 +173,7 @@ export default function RegisterForm() {
               Registration Successful!
             </h2>
             <p className="mt-2 text-gray-600">
-              Please check your email to verify your account. You'll be
+              Please check your email to verify your account. You&#39;ll be
               redirected to the login page shortly.
             </p>
           </div>
@@ -188,7 +191,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f1ed] px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center  px-4 py-10">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8]">
         <div className="mb-8 text-center">
           <h1 className="mt-3 text-3xl font-semibold text-[#0f5d3f]">
@@ -225,13 +228,13 @@ export default function RegisterForm() {
         )}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-1">
             <div>
               <label
                 htmlFor="firstName"
                 className="block text-sm font-medium text-gray-700"
               >
-                First Name *
+                Full Name *
               </label>
               <div className="mt-1">
                 <input
@@ -251,36 +254,6 @@ export default function RegisterForm() {
                 {fieldErrors.firstName && (
                   <p className="mt-1 text-sm text-red-600">
                     {fieldErrors.firstName}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm  font-medium text-gray-700"
-              >
-                Last Name *
-              </label>
-              <div className="mt-1">
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  autoComplete="family-name"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className={`block w-full text-[#0f5d3f] rounded-md border ${
-                    fieldErrors.lastName
-                      ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                  } p-2 shadow-sm sm:text-sm`}
-                />
-                {fieldErrors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.lastName}
                   </p>
                 )}
               </div>
@@ -317,35 +290,6 @@ export default function RegisterForm() {
 
           <div>
             <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone Number *
-            </label>
-            <div className="mt-1">
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className={`block w-full text-[#0f5d3f] rounded-md border ${
-                  fieldErrors.phone
-                    ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                } p-2 shadow-sm sm:text-sm`}
-                placeholder="+250 700 000 000"
-              />
-              {fieldErrors.phone && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
@@ -371,36 +315,6 @@ export default function RegisterForm() {
                   {fieldErrors.password}
                 </p>
               )}
-              <div className="mt-2 text-xs text-gray-500">
-                Password must contain:
-                <ul className="ml-4 list-disc">
-                  <li
-                    className={hasNumber(formData.password) ? "text-green-600" : ""}
-                  >
-                    At least one number
-                  </li>
-                  <li
-                    className={hasUppercase(formData.password) ? "text-green-600" : ""}
-                  >
-                    At least one uppercase letter
-                  </li>
-                  <li
-                    className={hasLowercase(formData.password) ? "text-green-600" : ""}
-                  >
-                    At least one lowercase letter
-                  </li>
-                  <li
-                    className={hasSpecialChar(formData.password) ? "text-green-600" : ""}
-                  >
-                    At least one special character
-                  </li>
-                  <li
-                    className={formData.password.length >= passwordMinLength ? "text-green-600" : ""}
-                  >
-                    At least {passwordMinLength} characters long
-                  </li>
-                </ul>
-              </div>
             </div>
           </div>
 
@@ -438,11 +352,11 @@ export default function RegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`flex w-full justify-center rounded-md border border-transparent ${
+              className={`flex w-full justify-center rounded-full border border-transparent ${
                 isSubmitting
                   ? "bg-[#0f5d3f] opacity-70"
                   : "bg-[#0f5d3f] hover:bg-[#0d4e35]"
-              } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2`}
+              } py-2 px-4 text-sm font-medium text-white rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2`}
             >
               {isSubmitting ? "Creating Account..." : "Create Account"}
             </button>
@@ -451,12 +365,13 @@ export default function RegisterForm() {
           <div className="mt-6 text-center text-sm">
             <p className="text-gray-600">
               Already have an account?{" "}
-              <Link
-                href="/auth/login"
+              <button
+                  type="button"
+                onClick={() => setView("login")}
                 className="font-semibold text-[#d97700] hover:text-[#b35f00]"
               >
                 Sign in
-              </Link>
+              </button>
             </p>
           </div>
 
@@ -472,9 +387,9 @@ export default function RegisterForm() {
           <div className="mb-6">
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
             >
-              <FaGoogle className="h-4 w-4 text-[#DB4437]" />
+              <GoogleIcon className="h-8 w-8" />
               <span>Continue with Google</span>
             </button>
           </div>

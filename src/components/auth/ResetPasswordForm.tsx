@@ -13,7 +13,7 @@ const hasLowercase = (value: string) => /[a-z]/.test(value);
 const hasSpecialChar = (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
 export default function ResetPasswordForm() {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const [token, setToken] = useState<string>("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,14 +29,11 @@ export default function ResetPasswordForm() {
   });
 
   useEffect(() => {
-    // Extract token from URL when component mounts
-    const urlToken = searchParams.get("token");
-    if (urlToken) {
-      setToken(urlToken);
-    } else {
-      setError("Invalid or missing reset token. Please use the link from your email.");
-    }
-  }, [searchParams]);
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) setToken(token);
+    else setError("invalid token");
+  }, []);
 
   useEffect(() => {
     // Update password validation state
@@ -94,8 +91,12 @@ export default function ResetPasswordForm() {
       });
       
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to reset password. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("Failed to reset password. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

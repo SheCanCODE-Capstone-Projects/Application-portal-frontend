@@ -6,17 +6,20 @@ import { useEffect, useState } from "react";
 import { verifyEmail } from "@/lib/api";
 
 export default function EmailVerification() {
-  const searchParams = useSearchParams();
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [message, setMessage] = useState<string>("Verifying your email address...");
 
   useEffect(() => {
     const verifyToken = async () => {
-      const token = searchParams.get("token");
+      // Extract token from URL
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
 
       if (!token) {
         setStatus("error");
-        setMessage("Invalid verification link. Please check your email for the correct link.");
+        setMessage(
+            "Invalid verification link. Please check your email for the correct link."
+        );
         return;
       }
 
@@ -24,18 +27,20 @@ export default function EmailVerification() {
         const result = await verifyEmail(token);
         setStatus("success");
         setMessage(
-          result.message || "Your email has been successfully verified! You can now log in to your account."
+            result.message ||
+            "Your email has been successfully verified! You can now log in to your account."
         );
-      } catch (error: any) {
+      } catch (error: unknown) {
         setStatus("error");
         setMessage(
-          error.message || "Failed to verify email. The link may be invalid or expired."
+            "Failed to verify email. The link may be invalid or expired."
         );
       }
     };
 
     verifyToken();
-  }, [searchParams]);
+  }, []);
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f1ed] px-4 py-10">
