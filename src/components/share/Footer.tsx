@@ -12,10 +12,8 @@ export const Footer = ({ year, className }: FooterProps) => {
 
   return (
     <footer className={cn("mt-auto w-full", className)}>
-      <div className="flex items-center justify-center px-4 py-3 sm:px-6 sm:py-4">
-        <span className="text-center text-xs sm:text-sm md:text-base text-emerald-900/70 font-medium">
-          © {displayYear} Igire Rwanda Organization
-        </span>
+      <div className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 text-lg sm:text-sm text-emerald-900/80">
+        <span className="text-center text-2xl">© {displayYear} Igire Rwanda Organization</span>
       </div>
     </footer>
   );
