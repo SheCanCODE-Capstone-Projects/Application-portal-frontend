@@ -11,7 +11,7 @@ export const Navbar = ({ className }: NavbarProps) => {
     return (
         <header
             className={cn(
-                "flex items-center justify-center py-4 sm:py-6",
+                "flex items-center justify-end py-4 sm:py-6",
                 className
             )}
         >
