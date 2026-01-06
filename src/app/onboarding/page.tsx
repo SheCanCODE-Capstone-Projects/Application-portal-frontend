@@ -150,7 +150,7 @@ export default function OnboardingPage() {
                                   <X size={20} />
                               </button>
 
-                              {/* ICON */}
+
                               <div className="flex items-center space-x-4 mb-4">
                                   {activeProgram.icon && (
                                       <activeProgram.icon className={`w-8 h-8 text-orange-500`} />
