@@ -79,47 +79,53 @@ export default function DashboardPage() {
                 View Details <ArrowRight className="w-4 h-4 ml-1" />
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-4">Your progress on the Application</p>
+            <p className="text-sm text-gray-600 mb-6">Your progress on the Application</p>
 
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-gray-800">Personal Information</span>
-                  <span className="text-sm text-gray-600">100%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }}></div>
+            {/* Circular Progress Chart */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-48 h-48">
+                <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle cx="50" cy="50" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+                  {/* Progress circle */}
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="40" 
+                    stroke="#10b981" 
+                    strokeWidth="8" 
+                    fill="none"
+                    strokeDasharray="251.2"
+                    strokeDashoffset="62.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-gray-800">75%</div>
+                    <div className="text-sm text-gray-600">Complete</div>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-gray-800">Academic History</span>
-                  <span className="text-sm text-gray-600">100%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }}></div>
-                </div>
+            {/* Progress Legend */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">Personal Info (100%)</span>
               </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-gray-800">References and Occupation</span>
-                  <span className="text-sm text-gray-600">75%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: "75" }}></div>
-                </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">Academic History (100%)</span>
               </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-gray-800">Documents Upload</span>
-                  <span className="text-sm text-gray-600">50%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "50%" }}></div>
-                </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">References (75%)</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-700">Documents (50%)</span>
               </div>
             </div>
           </div>
