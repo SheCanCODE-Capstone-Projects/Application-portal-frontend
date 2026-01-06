@@ -105,7 +105,7 @@ export default function OnboardingPage() {
                               : "border-slate-200"
                       )}
                   >
-                    {/* IMAGE */}
+
                     <Image
                         src={program.image}
                         alt={program.title}
@@ -114,20 +114,15 @@ export default function OnboardingPage() {
                         className="absolute inset-0 w-full h-full object-cover"
                     />
 
-                    {/* OVERLAY */}
+
                     <div className="absolute inset-0 bg-black/35 group-hover:bg-black/65 transition-all" />
 
-                    {/* TITLE */}
+
                     <div className="absolute inset-x-0 bottom-0 p-3">
                       <h3 className="text-white text-lg font-bold text-center">
                         {program.title}
                       </h3>
                     </div>
-
-                    {/* SELECTED RING */}
-                    {isActive && (
-                        <span className="absolute inset-0 rounded-2xl ring-2 ring-indigo-400 pointer-events-none" />
-                    )}
                   </motion.button>
               );
             })}
