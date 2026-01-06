@@ -1,6 +1,10 @@
-// src/app/admin/page.tsx
-import { redirect } from 'next/navigation';
+import DashboardPage from "@/app/admin/dashboard/page";
+
 
 export default function AdminHome() {
-  redirect('/admin/dashboard');
+  return (
+      <>
+        <DashboardPage />
+      </>
+  )
 }

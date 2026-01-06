@@ -1,212 +1,224 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Code, Database, Globe, ArrowLeft } from "lucide-react";
+import programs from "@/data/programe";
 import Image from "next/image";
+import {X} from "lucide-react";
 
 interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
   children: ReactNode;
+  showRadialGradient?: boolean;
 }
 
+
 const AuroraBackground = ({
-  className,
-  children,
-  ...props
-}: AuroraBackgroundProps) => {
+                            className,
+                            children,
+                            showRadialGradient = true,
+                            ...props
+                          }: AuroraBackgroundProps) => {
   return (
-    <main>
-      <div
-        className={cn(
-          "relative flex flex-col min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50",
-          className
-        )}
-        {...props}
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              background: `
-                radial-gradient(circle at 20% 80%, rgba(45, 90, 61, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(45, 90, 61, 0.04) 0%, transparent 50%)
-              `,
-            }}
-          />
+      <main>
+        <div
+            className={cn(
+                "relative flex flex-col h-[100vh] items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-slate-950 transition-bg",
+                className
+            )}
+            {...props}
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+                className={cn(
+                    `
+            [--white-gradient:repeating-linear-gradient(100deg,#f0f5f0_0%,#f0f5f0_7%,transparent_10%,transparent_12%,#f0f5f0_16%)]
+            [--dark-gradient:repeating-linear-gradient(100deg,#1a2e1a_0%,#1a2e1a_7%,transparent_10%,transparent_12%,#1a2e1a_16%)]
+            [--aurora:repeating-linear-gradient(100deg,#3d5c3d_10%,#c97a1a_15%,#5a7d5a_20%,#d4a84a_25%,#4a6b4a_30%)]
+            [background-image:var(--white-gradient),var(--aurora)]
+            dark:[background-image:var(--dark-gradient),var(--aurora)]
+            [background-size:300%,_200%]
+            [background-position:50%_50%,50%_50%]
+            filter blur-[10px] invert dark:invert-0
+            after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
+            after:dark:[background-image:var(--dark-gradient),var(--aurora)]
+            after:[background-size:200%,_100%] 
+            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
+            pointer-events-none
+            absolute -inset-[10px] opacity-50 will-change-transform`,
+                    showRadialGradient &&
+                    `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,transparent_70%)]`
+                )}
+            ></div>
+          </div>
+          {children}
         </div>
-        {children}
-      </div>
-    </main>
+      </main>
   );
 };
 
-const programs = [
-  {
-    id: "frontend",
-    title: "Frontend Development",
-    description: "Learn to build beautiful, interactive user interfaces with modern web technologies.",
-    icon: Code,
-    image: "/images/frontend.jpg",
-    color: "from-emerald-500 to-emerald-600",
-    languages: ["React", "TypeScript", "Tailwind CSS", "Next.js", "HTML5", "CSS3"],
-    duration: "16 weeks",
-    schedule: "Monday - Friday, 8:20 AM - 4:30 PM",
-  },
-  {
-    id: "backend",
-    title: "Backend Development",
-    description: "Master server-side development, databases, and API creation for robust applications.",
-    icon: Database,
-    image: "/images/backend.jpg",
-    color: "from-amber-500 to-orange-500",
-    languages: ["Java", "Node.js", "Express", "MongoDB", "PostgreSQL", "REST APIs"],
-    duration: "16 weeks",
-    schedule: "Monday - Friday, 8:20 AM - 4:30 PM",
-  },
-  {
-    id: "fundamentals",
-    title: "Web Fundamentals",
-    description: "Start your journey with HTML, CSS, and JavaScript fundamentals.",
-    icon: Globe,
-    image: "/images/webfundamental.jpg",
-    color: "from-teal-500 to-emerald-500",
-    languages: ["HTML5", "CSS3", "JavaScript", "Git", "Responsive Design"],
-    duration: "12 weeks",
-    schedule: "Monday - Friday, 8:20 AM - 4:30 PM",
-  },
-];
+
 
 export default function OnboardingPage() {
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
-
-  const handleSelectProgram = (programId: string) => {
-    setSelectedProgram(programId);
-  };
-
-  const handleBackToSelection = () => {
-    setSelectedProgram(null);
-  };
-
-  if (selectedProgram) {
-    const program = programs.find(p => p.id === selectedProgram);
-    if (!program) return null;
-
-    const Icon = program.icon;
-
-    return (
-      <AuroraBackground className="px-4 sm:px-6 lg:px-8">
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center py-12 min-h-screen">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-2xl mx-auto px-4"
-          >
-            <div className={`w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 rounded-2xl bg-gradient-to-r ${program.color} flex items-center justify-center mx-auto mb-4 md:mb-6`}>
-              <Icon className="w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 text-white" />
-            </div>
-            
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-[#2D5A3D] mb-2 md:mb-4">
-              {program.title}
-            </h1>
-            
-            <p className="text-sm sm:text-base md:text-lg text-[#2D5A3D]/70 mb-6 md:mb-8">
-              {program.description}
-            </p>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-white/20 mb-6 md:mb-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#2D5A3D] mb-4 md:mb-6">What You'll Learn</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3 mb-6 md:mb-8">
-                {program.languages.map((lang, i) => (
-                  <div key={i} className="bg-emerald-50 text-[#2D5A3D] px-2 sm:px-3 md:px-4 py-1 md:py-2 rounded-lg text-center font-medium text-xs sm:text-sm md:text-base">
-                    {lang}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6 text-left">
-                <div>
-                  <h4 className="font-bold text-[#2D5A3D] mb-2 text-sm md:text-base">Duration</h4>
-                  <p className="text-[#2D5A3D]/70 text-sm md:text-base">{program.duration}</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#2D5A3D] mb-2 text-sm md:text-base">Schedule</h4>
-                  <p className="text-[#2D5A3D]/70 text-sm md:text-base">{program.schedule}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <button
-                onClick={handleBackToSelection}
-                className="bg-white/90 backdrop-blur-sm text-[#2D5A3D] px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg hover:bg-white transition-all flex items-center justify-center gap-2 text-sm md:text-base"
-              >
-                <ArrowLeft size={16} className="md:w-5 md:h-5" />
-                Back to Programs
-              </button>
-              
-              <button
-                className="bg-gradient-to-r from-emerald-500 to-amber-500 text-white px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg hover:shadow-xl transition-all text-sm md:text-base"
-              >
-                Continue
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </AuroraBackground>
-    );
-  }
+  const activeProgram = programs.find(p => p.id === selectedProgram);
 
   return (
-    <AuroraBackground className="px-2 sm:px-4 md:px-6 lg:px-8">
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center py-6 sm:py-8 md:py-12 min-h-screen">
+      <AuroraBackground className="px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-4xl mx-auto px-4"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-[#2D5A3D] mb-2 md:mb-4">
-            Choose Your Path
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-[#2D5A3D]/70 mb-8 md:mb-12">
-            Select a program to start your journey in web development
+          {/* HEADER */}
+          <p className="text-2xl font-bold text-green-700 mb-2">
+            Onboarding To a Cohort
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-3">
+            What kind of cohort would you like to join?
+          </h1>
+
+          <p className="text-slate-800 text-center max-w-xl mb-10">
+            Choose the program that best fits your goals and start learning with a focused cohort.
+          </p>
+
+          {/* CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 w-full place-items-center">
             {programs.map((program, index) => {
+              const isActive = selectedProgram === program.id;
+
               return (
-                <motion.div
-                  key={program.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.2 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all overflow-hidden flex flex-col h-64 sm:h-72 md:h-80"
-                >
-                  <div className="flex-1 overflow-hidden">
+                  <motion.button
+                      key={program.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.15 }}
+                      onClick={() => setSelectedProgram(program.id)}
+                      className={cn(
+                          "group relative h-80 w-full",
+                          "rounded-2xl overflow-hidden border transition-all duration-300",
+                          "cursor-pointer hover:shadow-lg",
+                          isActive
+                              ? "border-orange-400"
+                              : "border-slate-200"
+                      )}
+                  >
+                    {/* IMAGE */}
                     <Image
-                      src={program.image}
-                      alt={program.title}
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover"
+                        src={program.image}
+                        alt={program.title}
+                        width="600"
+                        height="600"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
-                  </div>
-                  <div className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-bold text-[#2D5A3D] mb-3 md:mb-4 text-center">{program.title}</h3>
-                    <button
-                      onClick={() => handleSelectProgram(program.id)}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-amber-500 text-white py-2 md:py-3 rounded-full shadow-lg hover:shadow-xl transition-all font-medium text-sm md:text-base"
-                    >
-                      Select
-                    </button>
-                  </div>
-                </motion.div>
+
+                    {/* OVERLAY */}
+                    <div className="absolute inset-0 bg-black/35 group-hover:bg-black/65 transition-all" />
+
+                    {/* TITLE */}
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <h3 className="text-white text-lg font-bold text-center">
+                        {program.title}
+                      </h3>
+                    </div>
+
+                    {/* SELECTED RING */}
+                    {isActive && (
+                        <span className="absolute inset-0 rounded-2xl ring-2 ring-indigo-400 pointer-events-none" />
+                    )}
+                  </motion.button>
               );
             })}
+
+              <AnimatePresence>
+                  {activeProgram && (
+                      <motion.div
+                          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                      >
+                          <motion.div
+                              className="relative w-full max-w-3xl bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 overflow-y-auto max-h-[80vh]"
+                              initial={{ scale: 0.95, y: 20 }}
+                              animate={{ scale: 1, y: 0 }}
+                              exit={{ scale: 0.95, y: 20 }}
+                              transition={{ duration: 0.2, type: "spring", stiffness: 600, damping: 32 }}
+                          >
+
+                              <button
+                                  className="absolute top-6 right-5 text-gray-700 hover:text-gray-900 rounded-full border border-gray-300 shadow"
+                                  onClick={() => setSelectedProgram(null)}
+                              >
+                                  <X size={20} />
+                              </button>
+
+                              {/* ICON */}
+                              <div className="flex items-center space-x-4 mb-4">
+                                  {activeProgram.icon && (
+                                      <activeProgram.icon className={`w-8 h-8 text-orange-500`} />
+                                  )}
+                                  <h2 className="text-2xl font-bold">{activeProgram.title}</h2>
+                              </div>
+
+                              {/* DESCRIPTION */}
+                              <p className="text-gray-800 dark:text-gray-200 mb-4">
+                                  {activeProgram.description}
+                              </p>
+
+                              {/* LANGUAGES */}
+                              {activeProgram.languages && activeProgram.languages.length > 0 && (
+                                  <div className="mb-4">
+                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                          Languages & Tools:
+                                      </h3>
+                                      <div className="flex flex-wrap gap-3">
+                                          {activeProgram.languages.map((lang, idx) => {
+                                              const Icon = lang.icon;
+                                              return (
+                                                  <div
+                                                      key={idx}
+                                                      className="flex items-center gap-1 px-2 py-1"
+                                                  >
+                                                      <Icon className="w-5 h-5 text-green-600" />
+                                                      <span className="text-gray-700 dark:text-gray-300 text-sm">{lang.name}</span>
+                                                  </div>
+                                              );
+                                          })}
+                                      </div>
+                                  </div>
+                              )}
+
+                              {/* DURATION & SCHEDULE */}
+                              <div className="flex flex-col mb-6">
+                                  <div className="flex items-center space-x-4">
+                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">Duration:</h3>
+                                      <p className="text-gray-700 dark:text-gray-300">{activeProgram.duration}</p>
+                                  </div>
+                                  <div className="flex items-center space-x-4">
+                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">Schedule:</h3>
+                                      <p className="text-gray-700 dark:text-gray-300">{activeProgram.schedule}</p>
+                                  </div>
+                              </div>
+
+                              {/* CONTINUE BUTTON */}
+                              <button
+                                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full w-full"
+                                  onClick={() => {
+                                      // Add your "continue" logic here, e.g., go to next step
+                                      console.log("Continue clicked for", activeProgram.title);
+                                  }}
+                              >
+                                  Continue
+                              </button>
+                          </motion.div>
+                      </motion.div>
+                  )}
+              </AnimatePresence>
           </div>
         </motion.div>
-      </div>
-    </AuroraBackground>
+      </AuroraBackground>
   );
 }
