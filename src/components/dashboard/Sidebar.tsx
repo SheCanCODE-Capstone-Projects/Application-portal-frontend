@@ -31,7 +31,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
+    //  logout logic here
     router.push("/");
   };
 
