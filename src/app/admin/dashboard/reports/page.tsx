@@ -1,4 +1,4 @@
-// reports/page.tsx
+// src/app/admin/dashboard/reports/page.tsx
 export default function ReportsPage() {
     return (
       <div>
