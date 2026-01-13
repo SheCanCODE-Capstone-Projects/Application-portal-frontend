@@ -4,4 +4,5 @@ export default function ApplicantLayout({
   children: React.ReactNode;
 }) {
   return <>{children}</>;
+
 }
