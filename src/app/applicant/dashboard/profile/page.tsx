@@ -1,8 +1,50 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Calendar, Globe, Shield, Edit, Save, Lock } from 'lucide-react';
+import { userService, UserProfile } from '@/services/user';
 
 export default function ProfilePage() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profileData = await userService.getProfile();
+        setProfile(profileData);
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        // Set fallback profile data when API fails
+        setProfile({
+          id: 'APP-2025-001',
+          name: 'Demo User',
+          email: 'demo@example.com',
+          phone: '+250 788 123 456',
+          role: 'applicant'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
@@ -13,17 +55,17 @@ export default function ProfilePage() {
               <User className="w-12 h-12 text-green-600" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-800">User A </h1>
-              <p className="text-gray-600">Applicant ID: APP-2025-001</p>
+              <h1 className="text-2xl font-bold text-gray-800">{profile?.name || 'User'}</h1>
+              <p className="text-gray-600">Applicant ID: {profile?.id || 'N/A'}</p>
               <div className="flex items-center mt-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-sm text-green-600 font-medium">Active</span>
               </div>
+              <button className="mt-3 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Profile
+              </button>
             </div>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </button>
           </div>
         </div>
 
@@ -36,7 +78,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-xs text-gray-500 mb-1">Full Name</p>
-                  <p className="text-lg font-semibold text-gray-800">User A</p>
+                  <p className="text-lg font-semibold text-gray-800">{profile?.name || 'N/A'}</p>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-xs text-gray-500 mb-1">Date of Birth</p>
@@ -65,14 +107,14 @@ export default function ProfilePage() {
                   <Mail className="w-5 h-5 text-green-600 mr-3" />
                   <div>
                     <p className="text-xs text-gray-500">Email Address</p>
-                    <p className="text-sm font-semibold text-gray-800">user@email.com</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile?.email || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4 flex items-center">
                   <Phone className="w-5 h-5 text-green-600 mr-3" />
                   <div>
                     <p className="text-xs text-gray-500">Phone Number</p>
-                    <p className="text-sm font-semibold text-gray-800">+250 788 123 456</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile?.phone || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-4 flex items-center">

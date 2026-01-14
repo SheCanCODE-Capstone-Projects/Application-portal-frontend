@@ -29,17 +29,15 @@ export interface ApplicationProgress {
 
 class UserService {
   async getProfile(): Promise<UserProfile> {
-    return apiClient.get<UserProfile>(apiConfig.endpoints.user.profile);
+    return apiClient.get<UserProfile>('/api/v1/users/me');
   }
 
   async getApplications(): Promise<Application[]> {
-    return apiClient.get<Application[]>(apiConfig.endpoints.user.applications);
+    return apiClient.get<Application[]>('/api/v1/user/applications/my-application');
   }
 
   async getApplicationProgress(id: string): Promise<ApplicationProgress> {
-    return apiClient.get<ApplicationProgress>(
-      apiConfig.endpoints.user.applicationProgress(id)
-    );
+    return apiClient.get<ApplicationProgress>(`/api/v1/user/applications/${id}/progress`);
   }
 }
 

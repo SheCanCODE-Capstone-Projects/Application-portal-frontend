@@ -9,6 +9,7 @@ import {
   LogOut,
   GraduationCap,
 } from "lucide-react";
+import { authService } from "../../services/auth";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,8 +32,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    //  logout logic here
-    router.push("/");
+    authService.logout();
   };
 
   return (

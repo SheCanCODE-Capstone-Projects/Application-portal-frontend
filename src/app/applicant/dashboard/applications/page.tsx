@@ -1,8 +1,52 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { CheckCircle, Clock, Upload, Eye, Edit, MessageSquare, Download, FileText, AlertTriangle } from 'lucide-react';
+import { userService, Application } from '@/services/user';
 
 export default function ApplicationsPage() {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const applicationsData = await userService.getApplications();
+        setApplications(applicationsData);
+      } catch (error) {
+        console.error('Failed to fetch applications:', error);
+        // Set fallback application data when API fails
+        setApplications([{
+          id: 'APP-2025-001',
+          title: 'Software Engineering Program',
+          status: 'under_review',
+          submittedAt: '2024-12-15T00:00:00Z',
+          cohort: 'Spring 2025'
+        }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const currentApplication = applications[0];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
@@ -12,19 +56,19 @@ export default function ApplicationsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-1">Application ID</p>
-              <p className="text-lg font-bold text-gray-800">APP-2025-001</p>
+              <p className="text-lg font-bold text-gray-800">{currentApplication?.id || 'N/A'}</p>
             </div>
             <div className="border border-gray-200 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-1">Program Name</p>
-              <p className="text-lg font-bold text-gray-800">Advanced Frontend</p>
+              <p className="text-lg font-bold text-gray-800">{currentApplication?.title || 'N/A'}</p>
             </div>
             <div className="border border-gray-200 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-1">Submission Date</p>
-              <p className="text-lg font-bold text-gray-800">Nov 15, 2025</p>
+              <p className="text-lg font-bold text-gray-800">{currentApplication?.submittedAt ? new Date(currentApplication.submittedAt).toLocaleDateString() : 'N/A'}</p>
             </div>
             <div className="border border-gray-200 rounded-lg p-4">
               <p className="text-xs text-gray-500 mb-1">Current Status</p>
-              <p className="text-lg font-bold text-blue-600">Under Review</p>
+              <p className="text-lg font-bold text-blue-600">{currentApplication?.status || 'N/A'}</p>
             </div>
           </div>
         </div>
