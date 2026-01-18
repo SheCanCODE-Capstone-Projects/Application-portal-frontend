@@ -50,14 +50,14 @@ export default function ProfilePage() {
       <div className="max-w-6xl mx-auto">
         {/* Profile Header */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-          <div className="flex items-center space-x-6">
+          <div className="flex flex-col items-center md:flex-row md:items-start space-y-4 md:space-y-0 md:space-x-6">
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
               <User className="w-12 h-12 text-green-600" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 text-center md:text-left">
               <h1 className="text-2xl font-bold text-gray-800">{profile?.name || 'User'}</h1>
               <p className="text-gray-600">Applicant ID: {profile?.id || 'N/A'}</p>
-              <div className="flex items-center mt-2">
+              <div className="flex items-center justify-center md:justify-start mt-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-sm text-green-600 font-medium">Active</span>
               </div>
@@ -191,9 +191,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Actions</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center justify-center">
                   <Save className="w-4 h-4 mr-2" />

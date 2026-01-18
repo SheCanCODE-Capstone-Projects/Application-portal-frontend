@@ -245,7 +245,7 @@ export default function ApplicationsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Communication & Updates</h3>
               <div className="space-y-3">
-                <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+                <div className="bg-white border-l-4 border-blue-500 rounded-lg p-4">
                   <div className="flex items-center mb-2">
                     <MessageSquare className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="text-sm font-semibold text-blue-900">Admin Message</p>
@@ -253,7 +253,7 @@ export default function ApplicationsPage() {
                   <p className="text-sm text-blue-700 mb-1">Your application is progressing well</p>
                   <p className="text-xs text-blue-600">2 days ago</p>
                 </div>
-                <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                <div className="bg-white border-l-4 border-green-500 rounded-lg p-4">
                   <div className="flex items-center mb-2">
                     <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
                     <p className="text-sm font-semibold text-green-900">Status Update</p>

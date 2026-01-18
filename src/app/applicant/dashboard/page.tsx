@@ -258,7 +258,7 @@ export default function DashboardPage() {
               <Calendar className="w-5 h-5 text-gray-400" />
             </div>
             <div className="mb-4">
-              <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium text-gray-500 mb-2">
+              <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 mb-2">
                 <div>S</div>
                 <div>M</div>
                 <div>T</div>
@@ -267,11 +267,11 @@ export default function DashboardPage() {
                 <div>F</div>
                 <div>S</div>
               </div>
-              <div className="grid grid-cols-7 gap-2 text-center text-sm">
+              <div className="grid grid-cols-7 gap-1 text-center text-sm">
                 {Array.from({ length: daysInMonth }, (_, i) => (
                   <div
                     key={i}
-                    className={`p-2 rounded-lg cursor-pointer hover:bg-green-50 transition-colors ${
+                    className={`p-2 rounded-lg cursor-pointer hover:bg-green-50 transition-colors flex items-center justify-center ${
                       i + 1 === today ? "bg-green-600 text-white font-semibold" : "text-gray-700"
                     }`}
                   >
