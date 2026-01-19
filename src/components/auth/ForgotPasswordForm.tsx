@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { forgotPassword } from "@/lib/api";
-import {useAuth} from "@/app/context/AuthContext";
+import { emailAuthApi } from "@/api/auth/email";
+import { getErrorMessage } from "@/utils/errors";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,7 +12,7 @@ export default function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setView } = useAuth()
+  const [view, setView] = useState<'login' | 'forgot'>('forgot');
 
   const validate = (): boolean => {
     if (!email) {
@@ -37,14 +37,10 @@ export default function ForgotPasswordForm() {
     setIsSubmitting(true);
     
     try {
-      await forgotPassword(email);
+      await emailAuthApi.forgotPassword({ email });
       setSuccess(true);
     } catch (err: unknown) {
-      if(err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("failed to send reset link. Please try again.");
-      }
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

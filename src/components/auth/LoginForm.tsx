@@ -2,9 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useMemo } from "react";
-import { loginRequest } from "@/lib/api";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
-import {useAuth} from "@/app/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import { emailAuthApi } from "@/api/auth/email";
+import { googleAuthApi } from "@/api/auth/google";
+import { getErrorMessage } from "@/utils/errors";
+import { ROLE_ROUTES } from "@/constants/roles";
+import { onboardingUtils } from "@/utils/onboarding";
 
 type FieldErrors = {
   email?: string;
@@ -12,8 +16,9 @@ type FieldErrors = {
 };
 
 export default function LoginForm() {
-  const { setView } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
+  const [view, setView] = useState<'login' | 'register' | 'forgot'>('login');
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,24 +56,21 @@ export default function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await loginRequest({
+      const result = await emailAuthApi.login({
         email: email.trim(),
         password,
-        rememberMe,
       });
 
-      if (result.token) {
-        localStorage.setItem("jwt", result.token);
+      login(result.token, result.user, rememberMe, result.expiresIn);
+
+      if (!onboardingUtils.isCompleted()) {
+        router.push('/onboarding');
+      } else {
+        router.push(ROLE_ROUTES[result.user.role]);
       }
 
-      const role = result.user?.role?.toLowerCase();
-      const destination = role === "admin" ? "/admin/dashboard" : "/applicant/dashboard";
-
-      router.push(destination);
-
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Something went wrong while logging in.";
-      setFormError(message);
+      setFormError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -123,7 +125,7 @@ export default function LoginForm() {
               </label>
               <button
                   type="button"
-                  onClick={() => setView("forgot")}
+                  onClick={() => router.push('/auth/forgot-password')}
                   className="font-medium text-[#d97700]"
               >
                 Forgot password?
@@ -159,6 +161,7 @@ export default function LoginForm() {
             <div className="mt-6">
               <button
                   type="button"
+                  onClick={() => googleAuthApi.login()}
                   className="flex w-full items-center justify-center gap-2 rounded-full shadow-amber-50 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
               >
                 <GoogleIcon className="h-8 w-8" />
@@ -171,7 +174,7 @@ export default function LoginForm() {
             Don’t have an account?{" "}
             <button
                 type="button"
-                onClick={() => setView("register")}
+                onClick={() => router.push('/auth/register')}
                 className="font-semibold text-[#d97700]"
             >
               Sign Up

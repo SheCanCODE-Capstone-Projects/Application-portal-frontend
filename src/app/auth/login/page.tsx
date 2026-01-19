@@ -1,6 +1,11 @@
 import LoginForm from "@/components/auth/LoginForm";
+import PublicRoute from "@/guards/PublicRoute";
 
 export default function LoginPage() {
-  return <LoginForm  />;
+  return (
+    <PublicRoute>
+      <LoginForm />
+    </PublicRoute>
+  );
 }
 

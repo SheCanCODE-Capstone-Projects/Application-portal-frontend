@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { resetPassword } from "@/lib/api";
+import { emailAuthApi } from "@/api/auth/email";
+import { getErrorMessage } from "@/utils/errors";
 
 const passwordMinLength = 8;
 
@@ -84,19 +85,14 @@ export default function ResetPasswordForm() {
     setIsSubmitting(true);
     
     try {
-      await resetPassword({
+      await emailAuthApi.resetPassword({
         token,
-        password,
-        confirmPassword,
+        newPassword: password,
       });
       
       setSuccess(true);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("Failed to reset password. Please try again.");
-      }
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

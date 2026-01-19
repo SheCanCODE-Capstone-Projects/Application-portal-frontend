@@ -1,5 +1,5 @@
 import RegisterForm from "@/components/auth/RegisterForm";
-
+import PublicRoute from "@/guards/PublicRoute";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return (
+    <PublicRoute>
+      <RegisterForm />
+    </PublicRoute>
+  );
 }

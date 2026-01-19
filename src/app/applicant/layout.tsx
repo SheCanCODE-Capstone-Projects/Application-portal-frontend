@@ -1,7 +1,13 @@
+import RoleGuard from "@/guards/RoleGuard";
+
 export default function ApplicantLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <RoleGuard allowedRoles={['APPLICANT']}>
+      {children}
+    </RoleGuard>
+  );
 }

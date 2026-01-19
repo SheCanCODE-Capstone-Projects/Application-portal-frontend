@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import PublicRoute from "@/guards/PublicRoute";
 
 export const metadata: Metadata = {
   title: "Forgot Password | SheCanCODE",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />;
+  return (
+    <PublicRoute>
+      <ForgotPasswordForm />
+    </PublicRoute>
+  );
 }

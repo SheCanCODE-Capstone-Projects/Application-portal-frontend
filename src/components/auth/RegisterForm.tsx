@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { registerUser } from "@/lib/api";
 import {GoogleIcon} from "@/components/icons/GoogleIcon";
-import {useAuth} from "@/app/context/AuthContext";
+import { emailAuthApi } from "@/api/auth/email";
+import { googleAuthApi } from "@/api/auth/google";
+import { getErrorMessage } from "@/utils/errors";
+import { useRouter } from "next/navigation";
 
 type FieldErrors = {
   email?: string;
+  username?: string;
   password?: string;
   confirmPassword?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
 };
 
 
@@ -25,17 +25,15 @@ const hasLowercase = (value: string) => /[a-z]/.test(value);
 const hasSpecialChar = (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
 export default function RegisterForm() {
-  const {setView} = useAuth();
-  // const router = useRouter();
+  const router = useRouter();
+  const [view, setView] = useState<'login' | 'register' | 'forgot'>('register');
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -45,33 +43,18 @@ export default function RegisterForm() {
 
   const validate = (): boolean => {
     const errors: FieldErrors = {};
-    const { email, password, confirmPassword, firstName, lastName, phone } = formData;
+    const { email, username, password, confirmPassword } = formData;
 
-    // Email validation
     if (!email) {
       errors.email = "Email is required";
     } else if (!emailRegex.test(email)) {
       errors.email = "Please enter a valid email address";
     }
 
-    // First name validation
-    if (!firstName.trim()) {
-      errors.firstName = "First name is required";
+    if (!username.trim()) {
+      errors.username = "Username is required";
     }
 
-    // Last name validation
-    if (!lastName.trim()) {
-      errors.lastName = "Last name is required";
-    }
-
-    // Phone validation (basic)
-    if (!phone.trim()) {
-      errors.phone = "Phone number is required";
-    } else if (!/^\+?[0-9\s-]+$/.test(phone)) {
-      errors.phone = "Please enter a valid phone number";
-    }
-
-    // Password validation
     if (!password) {
       errors.password = "Password is required";
     } else {
@@ -92,7 +75,6 @@ export default function RegisterForm() {
       }
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       errors.confirmPassword = "Please confirm your password";
     } else if (password !== confirmPassword) {
@@ -129,20 +111,16 @@ export default function RegisterForm() {
 
     try {
       const { confirmPassword, ...registrationData } = formData;
-      await registerUser(registrationData);
+      await emailAuthApi.register(registrationData);
 
       setRegistrationSuccess(true);
 
       setTimeout(() => {
-        setView("login")
-      }, 3000);
+        router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email));
+      }, 2000);
 
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError("failed to register  Pleas try again ")
-    }
+      setFormError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -231,29 +209,29 @@ export default function RegisterForm() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1">
             <div>
               <label
-                htmlFor="firstName"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Full Name *
+                Username *
               </label>
               <div className="mt-1">
                 <input
-                  id="firstName"
-                  name="firstName"
+                  id="username"
+                  name="username"
                   type="text"
-                  autoComplete="given-name"
+                  autoComplete="username"
                   required
-                  value={formData.firstName}
+                  value={formData.username}
                   onChange={handleChange}
                   className={`block w-full text-[#0f5d3f] rounded-md border ${
-                    fieldErrors.firstName
+                    fieldErrors.username
                       ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
                   } p-2 shadow-sm sm:text-sm`}
                 />
-                {fieldErrors.firstName && (
+                {fieldErrors.username && (
                   <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.firstName}
+                    {fieldErrors.username}
                   </p>
                 )}
               </div>
@@ -367,7 +345,7 @@ export default function RegisterForm() {
               Already have an account?{" "}
               <button
                   type="button"
-                onClick={() => setView("login")}
+                onClick={() => router.push('/auth/login')}
                 className="font-semibold text-[#d97700] hover:text-[#b35f00]"
               >
                 Sign in
@@ -387,6 +365,7 @@ export default function RegisterForm() {
           <div className="mb-6">
             <button
               type="button"
+              onClick={() => googleAuthApi.signup()}
               className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
             >
               <GoogleIcon className="h-8 w-8" />
