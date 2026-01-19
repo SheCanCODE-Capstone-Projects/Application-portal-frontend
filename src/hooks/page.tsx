@@ -1,0 +1,5 @@
+function hooks() {
+    return {
+
+    }
+}
