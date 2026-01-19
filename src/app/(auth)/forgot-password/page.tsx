@@ -1,0 +1,11 @@
+import { Metadata } from 'next';
+import ForgotPasswordForm from "@/app/components/auth/ForgotPasswordForm";
+
+export const metadata: Metadata = {
+  title: "Forgot Password | SheCanCODE",
+  description: "Reset your SheCanCODE account password",
+};
+
+export default function ForgotPasswordPage() {
+  return <ForgotPasswordForm />;
+}
