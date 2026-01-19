@@ -10,6 +10,7 @@ import {
   ChartBarIcon,
   CogIcon,
   ArrowLeftOnRectangleIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -17,7 +18,9 @@ const navigation = [
   { name: 'Users', href: '/admin/dashboard/users', icon: UsersIcon },
   { name: 'Reports', href: '/admin/dashboard/reports', icon: ChartBarIcon },
   { name: 'Settings', href: '/admin/dashboard/settings', icon: CogIcon },
+  {name: 'Cohorts', href: '/admin/dashboard/cohorts', icon: CalendarDaysIcon},
   { name: 'Logout', href: '/api/auth/logout', icon: ArrowLeftOnRectangleIcon, external: true },
+  
 ];
 
 export default function Sidebar({

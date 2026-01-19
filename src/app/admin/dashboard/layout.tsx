@@ -3,7 +3,7 @@
 
 import { useState, ReactNode } from 'react';
 import Header from '@/components/admin/Header';
-import Sidebar from '@/components/admin/Sidebar';
+import  Sidebar  from '@/components/admin/Sidebar'; 
 import MainContent from '@/components/admin/MainContent';
 import { AdminApplicationProvider } from '@/contexts/AdminApplicationContext';
 
