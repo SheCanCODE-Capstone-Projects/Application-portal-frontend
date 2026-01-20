@@ -1,152 +1,45 @@
 "use client";
 
-import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { registerUser } from "@/lib/api";
-import {GoogleIcon} from "@/app/components/icons/GoogleIcon";
+import {GoogleIcon} from "@/components/icons/GoogleIcon";
 import {useAuth} from "@/context/AuthContext";
-
-type FieldErrors = {
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-};
-
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordMinLength = 8;
-
-const hasNumber = (value: string) => /\d/.test(value);
-const hasUppercase = (value: string) => /[A-Z]/.test(value);
-const hasLowercase = (value: string) => /[a-z]/.test(value);
-const hasSpecialChar = (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value);
+import {useRegisterForm} from "@/hooks/useRegisterForm";
+import {useState} from "react";
+import {useRegister} from "@/hooks/useRegister";
+import {toast} from "sonner";
+import Link from "next/link";
 
 export default function RegisterForm() {
   const {setView} = useAuth();
-  // const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-  });
-
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const { register } = useRegister();
   const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registrationSuccess, setRegisterationSuccess] = useState(false);
+  const {
+    formData,
+    errors: fieldErrors,
+    isLoading,
+    handleChange,
+    handleSubmit,
+  } = useRegisterForm();
 
-  const validate = (): boolean => {
-    const errors: FieldErrors = {};
-    const { email, password, confirmPassword, firstName, lastName, phone } = formData;
-
-    // Email validation
-    if (!email) {
-      errors.email = "Email is required";
-    } else if (!emailRegex.test(email)) {
-      errors.email = "Please enter a valid email address";
-    }
-
-    // First name validation
-    if (!firstName.trim()) {
-      errors.firstName = "First name is required";
-    }
-
-    // Last name validation
-    if (!lastName.trim()) {
-      errors.lastName = "Last name is required";
-    }
-
-    // Phone validation (basic)
-    if (!phone.trim()) {
-      errors.phone = "Phone number is required";
-    } else if (!/^\+?[0-9\s-]+$/.test(phone)) {
-      errors.phone = "Please enter a valid phone number";
-    }
-
-    // Password validation
-    if (!password) {
-      errors.password = "Password is required";
-    } else {
-      if (password.length < passwordMinLength) {
-        errors.password = `Password must be at least ${passwordMinLength} characters long`;
-      }
-      if (!hasNumber(password)) {
-        errors.password = "Password must contain at least one number";
-      }
-      if (!hasUppercase(password)) {
-        errors.password = "Password must contain at least one uppercase letter";
-      }
-      if (!hasLowercase(password)) {
-        errors.password = "Password must contain at least one lowercase letter";
-      }
-      if (!hasSpecialChar(password)) {
-        errors.password = "Password must contain at least one special character";
-      }
-    }
-
-    // Confirm password validation
-    if (!confirmPassword) {
-      errors.confirmPassword = "Please confirm your password";
-    } else if (password !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear field error when user types
-    if (fieldErrors[name as keyof FieldErrors]) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: typeof formData) => {
     try {
-      const { confirmPassword, ...registrationData } = formData;
-      await registerUser(registrationData);
+      const res = await register(data);
 
-      setRegistrationSuccess(true);
-
-      setTimeout(() => {
-        setView("login")
-      }, 3000);
-
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message);
+      if (res.message === "verification email sent") {
+        toast.success(res.message);
+        setRegisterationSuccess(true);
       } else {
-        setError("failed to register  Pleas try again ")
-    }
-    } finally {
-      setIsSubmitting(false);
+        toast.error("Account created successfully.");
+      }
+
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message || "Registration failed.";
+      setFormError(msg);
+      toast.error(msg);
     }
   };
+
+
 
   if (registrationSuccess) {
     return (
@@ -227,33 +120,34 @@ export default function RegisterForm() {
           </div>
         )}
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1">
             <div>
               <label
-                htmlFor="firstName"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
                 Full Name *
               </label>
               <div className="mt-1">
                 <input
-                  id="firstName"
-                  name="firstName"
+                  id="username"
+                  name="username"
                   type="text"
                   autoComplete="given-name"
                   required
-                  value={formData.firstName}
+                  value={formData.username}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className={`block w-full text-[#0f5d3f] rounded-md border ${
-                    fieldErrors.firstName
+                    fieldErrors.username
                       ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
                   } p-2 shadow-sm sm:text-sm`}
                 />
-                {fieldErrors.firstName && (
+                {fieldErrors.username && (
                   <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.firstName}
+                    {fieldErrors.username}
                   </p>
                 )}
               </div>
@@ -276,6 +170,7 @@ export default function RegisterForm() {
                 required
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isLoading}
                 className={`block w-full text-[#0f5d3f] rounded-md border ${
                   fieldErrors.email
                     ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
@@ -304,6 +199,7 @@ export default function RegisterForm() {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isLoading}
                 className={`block w-full text-[#0f5d3f] rounded-md border ${
                   fieldErrors.password
                     ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
@@ -319,46 +215,16 @@ export default function RegisterForm() {
           </div>
 
           <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Confirm Password *
-            </label>
-            <div className="mt-1">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`block w-full text-[#0f5d3f] rounded-md border ${
-                  fieldErrors.confirmPassword
-                    ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                } p-2 shadow-sm sm:text-sm`}
-              />
-              {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {fieldErrors.confirmPassword}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isLoading}
               className={`flex w-full justify-center rounded-full border border-transparent ${
-                isSubmitting
+                  isLoading
                   ? "bg-[#0f5d3f] opacity-70"
                   : "bg-[#0f5d3f] hover:bg-[#0d4e35]"
               } py-2 px-4 text-sm font-medium text-white rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2`}
             >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </div>
 

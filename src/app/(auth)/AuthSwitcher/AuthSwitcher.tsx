@@ -1,8 +1,8 @@
 "use client";
 
-import RegisterForm from "@/app/components/auth/RegisterForm";
-import LoginForm from "@/app/components/auth/LoginForm";
-import ForgotPasswordForm from "@/app/components/auth/ForgotPasswordForm";
+import RegisterForm from "@/components/auth/RegisterForm";
+import LoginForm from "@/components/auth/LoginForm";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import {AuthProvider, useAuth} from "@/context/AuthContext";
 
 export default function AuthSwitcher() {

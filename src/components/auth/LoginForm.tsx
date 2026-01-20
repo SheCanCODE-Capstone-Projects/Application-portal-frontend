@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useMemo } from "react";
 import { loginRequest } from "@/lib/api";
-import { GoogleIcon } from "@/app/components/icons/GoogleIcon";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import {useAuth} from "@/context/AuthContext";
 
 type FieldErrors = {
