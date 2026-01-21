@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import {resendVerificationRoute} from "@/app/api/resendverification/route";
 
 export const useResendVerification = () => {
     const [loading, setLoading] = useState(false);
@@ -13,10 +12,27 @@ export const useResendVerification = () => {
 
         try {
             setLoading(true);
-            const data = await resendVerificationRoute(email);
+
+            const res = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to resend verification email");
+            }
+
             toast.success(data.message || "Verification email sent!");
-        } catch (err: any) {
-            toast.error(err.message || "Failed to resend verification email");
+        } catch (error) {
+            const msg =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to resend verification email";
+
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

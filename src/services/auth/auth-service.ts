@@ -1,35 +1,38 @@
-import axios from "axios";
-import { RegisterFormData } from "@/hooks/useRegisterForm";
+import {AUTH_ROUTES} from "@/services/auth/auth-controller";
+import {api} from "@/lib/authapi";
+import {RestFormData} from "@/types/RestFormData";
+import {LoginFormData} from "@/types/LoginFormData";
+import {RegisterFormData} from "@/types/register";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const authService = {
     register: async (payload: RegisterFormData) => {
-        const response = await axios.post(
-            `${BACKEND_URL}/api/v1/auth/register`,
-            payload,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const res = await api.post(AUTH_ROUTES.REGISTER, payload);
+        return res.data;
+    },
 
-        return response.data;
+    verify: async (token: string) => {
+        const res = await api.post(AUTH_ROUTES.VERIFY_EMAIL, { token });
+        return res.data;
+    },
+
+    resendVerify: async (email: string) => {
+        const res = await api.post(AUTH_ROUTES.RESEND_VERIFICATION, { email });
+        return res.data;
+    },
+
+    forgotPassword: async (email: string) => {
+        const res = await api.post(AUTH_ROUTES.FORGOT_PASSWORD, { email });
+        return res.data;
+    },
+
+    resetPassword: async (payload: RestFormData) => {
+        const res = await api.post(AUTH_ROUTES.RESET_PASSWORD, payload);
+        return res.data;
+    },
+
+    login: async (payload: LoginFormData) => {
+        const res = await api.post(AUTH_ROUTES.LOGIN, payload);
+        return res.data;
     },
 };
-
-export const verifyEmailService = async (token: string) => {
-    const res = await axios.post(`${BACKEND_URL}/api/v1/auth/verify-email`, { token }, {
-        headers: {
-            "Content-Type": "application/json",
-        }
-    });
-    return res.data; 
-}
-
-export const resendVerificationService = async (email: string) => {
-    const res = await axios.post(`${BACKEND_URL}/api/v1/auth/resend-verification`, {email});
-    return res.data;
-}
-

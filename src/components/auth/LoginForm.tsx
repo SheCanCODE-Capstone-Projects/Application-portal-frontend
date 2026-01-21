@@ -2,99 +2,44 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useMemo } from "react";
-import { loginRequest } from "@/lib/api";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import {useAuth} from "@/context/AuthContext";
-
-type FieldErrors = {
-  email?: string;
-  password?: string;
-};
+import {useLoginForm} from "@/hooks/userLoginForm";
 
 export default function LoginForm() {
   const { setView } = useAuth();
-  const router = useRouter();
+  const {
+    formData,
+    errors,
+    isLoading,
+    handleChange,
+    handleSubmit,
+  } = useLoginForm();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isFormValid = useMemo(() => emailRegex.test(email) && password.length > 0, [email, emailRegex, password.length]);
-
-  const validate = () => {
-    const errors: FieldErrors = {};
-
-    if (!email) {
-      errors.email = "Email is required";
-    } else if (!emailRegex.test(email)) {
-      errors.email = "Enter a valid email address";
-    }
-
-    if (!password) {
-      errors.password = "Password is required";
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormError(null);
-
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-
-    try {
-      const result = await loginRequest({
-        email: email.trim(),
-        password,
-        rememberMe,
-      });
-
-      if (result.token) {
-        localStorage.setItem("jwt", result.token);
-      }
-
-      const role = result.user?.role?.toLowerCase();
-      const destination = role === "@admin" ? "/@admin/dashboard" : "/@applicant/dashboard";
-
-      router.push(destination);
-
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Something went wrong while logging in.";
-      setFormError(message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8]">
+      <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8] z-50">
           <div className="mb-8 text-center">
             <h1 className="mt-3 text-3xl font-semibold text-[#0f5d3f]">Welcome Back</h1>
             <p className="mt-2 text-sm text-[#3f3f3f]">Sign in to access your account</p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+          <form className="space-y-6" onSubmit={handleSubmit(rememberMe)}>
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-[#0f5d3f]">Email address *</label>
               <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full rounded-lg border border-[#c8c0b9] bg-white px-3 py-2 text-sm text-[#0f5d3f] shadow-sm focus:border-[#d97700] focus:ring-2 focus:ring-[#d97700]/40"
               />
-              {fieldErrors.email && <p className="text-sm text-[#c2410c]">{fieldErrors.email}</p>}
+              {errors.email && <p className="text-sm text-[#c2410c]">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -102,13 +47,14 @@ export default function LoginForm() {
               <label htmlFor="password" className="block text-sm font-medium text-[#0f5d3f]">Password *</label>
               <input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={handleChange}
                   className="w-full rounded-lg border text-[#0f5d3f] border-[#c8c0b9] bg-white px-3 py-2 text-sm shadow-sm focus:border-[#d97700] focus:ring-2 focus:ring-[#d97700]/40"
               />
-              {fieldErrors.password && <p className="text-sm text-[#c2410c]">{fieldErrors.password}</p>}
+              {errors.password && <p className="text-sm text-[#c2410c]">{errors.password}</p>}
             </div>
 
             <div className="flex items-center justify-between text-sm">
@@ -130,19 +76,19 @@ export default function LoginForm() {
               </button>
             </div>
 
-            {formError && (
-                <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {formError}
-                </div>
-            )}
+            {/*{formError && (*/}
+            {/*    <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">*/}
+            {/*      {formError}*/}
+            {/*    </div>*/}
+            {/*)}*/}
 
             {/* Submit Button */}
             <button
                 type="submit"
-                disabled={!isFormValid || isSubmitting}
+                disabled={isLoading}
                 className="w-full rounded-full bg-[#0f5d3f] px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#0a4330] disabled:bg-gray-400"
             >
-              {isSubmitting ? "Signing in..." : "Login"}
+              {isLoading ? "Signing in..." : "Login"}
             </button>
           </form>
 

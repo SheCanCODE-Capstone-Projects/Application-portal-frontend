@@ -1,16 +1,20 @@
-import { authService } from "@/services/auth/auth-service";
-import { RegisterFormData } from "@/hooks/useRegisterForm";
+import {RegisterFormData} from "@/types/register";
+
 
 export const useRegister = () => {
     const register = async (data: RegisterFormData) => {
-        try {
-            return await authService.register(data);
-        } catch (error: any) {
-            throw new Error(
-                error?.response?.data?.message ||
-                "Registration failed"
-            );
+        const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            throw new Error(result.message || "Registration failed");
         }
+        return result;
     };
 
     return { register };

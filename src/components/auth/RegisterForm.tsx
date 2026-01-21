@@ -3,16 +3,18 @@
 import {GoogleIcon} from "@/components/icons/GoogleIcon";
 import {useAuth} from "@/context/AuthContext";
 import {useRegisterForm} from "@/hooks/useRegisterForm";
-import {useState} from "react";
-import {useRegister} from "@/hooks/useRegister";
+import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import Link from "next/link";
+import {useRegister} from "@/hooks/useRegister";
+import {useRouter} from "next/navigation";
 
 export default function RegisterForm() {
   const {setView} = useAuth();
   const { register } = useRegister();
   const [formError, setFormError] = useState<string | null>(null);
-  const [registrationSuccess, setRegisterationSuccess] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const router = useRouter();
   const {
     formData,
     errors: fieldErrors,
@@ -21,29 +23,46 @@ export default function RegisterForm() {
     handleSubmit,
   } = useRegisterForm();
 
+  useEffect(() => {
+    if (registrationSuccess) {
+      const time = setTimeout(() => {
+        router.push("/login");
+      }, 5000);
+
+      return () => clearTimeout(time);
+    }
+  }, [registrationSuccess, router]);
+
   const onSubmit = async (data: typeof formData) => {
     try {
       const res = await register(data);
 
-      if (res.message === "verification email sent") {
-        toast.success(res.message);
-        setRegisterationSuccess(true);
+      toast.success(res.message || "Account created successfully");
+
+      setRegistrationSuccess(true);
+
+    } catch (error: unknown) {
+
+      let message: string;
+
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === "object" && error !== null && "message" in error) {
+        message = (error as { message: string }).message;
       } else {
-        toast.error("Account created successfully.");
+        message = "Failed to register";
       }
 
-    } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || "Registration failed.";
-      setFormError(msg);
-      toast.error(msg);
+      setFormError(message);
+
+      toast.error(message);
     }
   };
 
 
-
   if (registrationSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full z-30">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-[#d7cfc8]">
           <div className="mb-6">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -72,8 +91,8 @@ export default function RegisterForm() {
           </div>
           <div className="mt-6">
             <Link
-              href="/src/app/(auth)/login"
-              className="text-sm font-medium text-[#0f5d3f] hover:text-[#0d4e35]"
+              href="/login"
+              className="text-md font-medium text-[#0f5d3f] hover:text-[#0d4e35]"
             >
               Go to Login
             </Link>
@@ -84,7 +103,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center  px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full z-30">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#d7cfc8]">
         <div className="mb-8 text-center">
           <h1 className="mt-3 text-3xl font-semibold text-[#0f5d3f]">

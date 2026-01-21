@@ -23,6 +23,5 @@ function AuthSwitcherContent() {
             {view === "forgot" && <ForgotPasswordForm />}
         </>
 
-
     );
 }
