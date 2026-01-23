@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import ForgotPasswordForm from "@/app/components/auth/ForgotPasswordForm";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import {AuroraBackground} from "@/components/background/page";
 
 export const metadata: Metadata = {
   title: "Forgot Password | SheCanCODE",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />;
+  return (
+      <AuroraBackground className="px-3 sm:px-4">
+      <ForgotPasswordForm />
+      </AuroraBackground>
+  )
 }
