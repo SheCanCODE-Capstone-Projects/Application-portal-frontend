@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useVerifyEmail } from "@/hooks/useVerifyEmail";
-import { useResendVerification } from "@/hooks/useResendVerification";
+import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail";
+import { useResendVerification } from "@/hooks/auth/useResendVerification";
 
 export default function EmailVerification() {
     const searchParams = useSearchParams();

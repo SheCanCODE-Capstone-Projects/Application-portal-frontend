@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { RestFormData, RestFieldErrors } from "@/types/RestFormData";
+import { RestFormData, RestFieldErrors } from "@/types/auth/RestFormData";
 
 const passwordMinLength = 8;
 

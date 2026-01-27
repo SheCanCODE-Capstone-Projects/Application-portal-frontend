@@ -2,12 +2,13 @@
 
 import {GoogleIcon} from "@/components/icons/GoogleIcon";
 import {useAuth} from "@/context/AuthContext";
-import {useRegisterForm} from "@/hooks/useRegisterForm";
+import {useRegisterForm} from "@/hooks/auth/form/useRegisterForm";
 import {useEffect, useState} from "react";
 import {toast} from "sonner";
 import Link from "next/link";
-import {useRegister} from "@/hooks/useRegister";
+import {useRegister} from "@/hooks/auth/useRegister";
 import {useRouter} from "next/navigation";
+import {useGoogleAuth} from "@/hooks/auth/googleAuth";
 
 export default function RegisterForm() {
   const {setView} = useAuth();
@@ -15,6 +16,7 @@ export default function RegisterForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const router = useRouter();
+  const { loading, sendGoogleAuth } = useGoogleAuth();
   const {
     formData,
     errors: fieldErrors,
@@ -271,12 +273,15 @@ export default function RegisterForm() {
 
           <div className="mb-6">
             <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
+                type="button"
+                onClick={sendGoogleAuth}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <GoogleIcon className="h-8 w-8" />
-              <span>Continue with Google</span>
+              <span>{loading ? "Signing in..." : "Continue with Google"}</span>
             </button>
+
           </div>
         </form>
 

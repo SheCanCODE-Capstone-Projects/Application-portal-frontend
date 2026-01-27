@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { VerificationStatus } from "@/types/verificationstatus";
+import { VerificationStatus } from "@/types/auth/verificationstatus";
 
 export const useVerifyEmail = (token: string | null) => {
     const [status, setStatus] = useState<VerificationStatus>("verifying");

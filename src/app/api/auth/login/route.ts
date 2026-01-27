@@ -1,4 +1,4 @@
-import {LoginFormData} from "@/types/LoginFormData";
+import {LoginFormData} from "@/types/auth/LoginFormData";
 import {authService} from "@/services/auth/auth-service";
 import {NextResponse} from "next/server";
 

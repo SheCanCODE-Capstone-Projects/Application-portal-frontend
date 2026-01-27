@@ -1,11 +1,14 @@
 import React from "react";
+import AdminGuard from "./AdminGuard";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return(
-      children
+  return (
+    <AdminGuard>
+      {children}
+    </AdminGuard>
   );
 }

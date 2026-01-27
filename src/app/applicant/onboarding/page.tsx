@@ -202,7 +202,7 @@ export default function OnboardingPage() {
                               <button
                                   className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full w-full"
                                   onClick={() => {
-                                      // Add your "continue" logic here, e.g., go to next step
+
                                       console.log("Continue clicked for", activeProgram.title);
                                   }}
                               >

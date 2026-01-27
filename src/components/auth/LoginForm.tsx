@@ -1,13 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FormEvent, useState, useMemo } from "react";
+
+import { useState } from "react";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
-import {useAuth} from "@/context/AuthContext";
-import {useLoginForm} from "@/hooks/userLoginForm";
+import {useLoginForm} from "@/hooks/auth/form/userLoginForm";
+import {useGoogleAuth} from "@/hooks/auth/googleAuth";
+import { useRouter } from "next/navigation";
+
 
 export default function LoginForm() {
-  const { setView } = useAuth();
+  const { loading, sendGoogleAuth } = useGoogleAuth();
   const {
     formData,
     errors,
@@ -17,6 +19,7 @@ export default function LoginForm() {
   } = useLoginForm();
 
   const [rememberMe, setRememberMe] = useState(false);
+  const router = useRouter();
 
   return (
       <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
@@ -69,7 +72,7 @@ export default function LoginForm() {
               </label>
               <button
                   type="button"
-                  onClick={() => setView("forgot")}
+                  onClick={() => router.push("/forgot-password")}
                   className="font-medium text-[#d97700]"
               >
                 Forgot password?
@@ -105,10 +108,12 @@ export default function LoginForm() {
             <div className="mt-6">
               <button
                   type="button"
+                  onClick={sendGoogleAuth}
+                  disabled={loading}
                   className="flex w-full items-center justify-center gap-2 rounded-full shadow-amber-50 border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2"
               >
                 <GoogleIcon className="h-8 w-8" />
-                <span>Continue with Google</span>
+                <span>{loading ? "Logging in..." : "Continue with Google"}</span>
               </button>
             </div>
           </div>
@@ -117,7 +122,7 @@ export default function LoginForm() {
             Don’t have an account?{" "}
             <button
                 type="button"
-                onClick={() => setView("register")}
+                onClick={() => router.push("/login")}
                 className="font-semibold text-[#d97700]"
             >
               Sign Up

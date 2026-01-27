@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {FieldErrors, RegisterFormData} from "@/types/register";
+import {FieldErrors, RegisterFormData} from "@/types/auth/register";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordMinLength = 8;

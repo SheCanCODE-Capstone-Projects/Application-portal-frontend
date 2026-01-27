@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { RestFormData } from "@/types/RestFormData";
+import { RestFormData } from "@/types/auth/RestFormData";
 
 export const useResetPassword = () => {
     const resetPassword = async (data: RestFormData) => {

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { LoginFormData, LoginErrors } from "@/types/LoginFormData";
-import { useUserLogin } from "@/hooks/userLogin";
+import { LoginFormData, LoginErrors } from "@/types/auth/LoginFormData";
+import { useUserLogin } from "@/hooks/auth/userLogin";
+import { toast } from "sonner";
+import {useRouter} from "next/navigation";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordMinLength = 8;
@@ -21,6 +23,7 @@ export const useLoginForm = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const { login } = useUserLogin();
+    const router = useRouter();
 
     const validate = (): boolean => {
         const newErrors: LoginErrors = {};
@@ -66,14 +69,25 @@ export const useLoginForm = () => {
                 try {
                     setIsLoading(true);
                     const result = await login(formData);
-                    console.log("Login success:", result);
+
+                    if (result.success) {
+                        toast.success("Login successful");
+
+                        router.push("/");
+                    } else {
+                        setErrors({
+                            email: result.message || "Login failed",
+                        });
+                        toast.error(result.message || "Login failed");
+                    }
+
                 } catch (error) {
                     if (error instanceof Error) {
                         setErrors({
                             email: error.message || "Login failed",
                         });
+                        toast.error(error.message || "Login failed");
                     }
-
                 } finally {
                     setIsLoading(false);
                 }

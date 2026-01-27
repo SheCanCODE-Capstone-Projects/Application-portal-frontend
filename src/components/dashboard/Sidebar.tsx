@@ -16,9 +16,9 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { icon: Home, label: "Home", path: "/@applicant/dashboard" },
-  { icon: User, label: "Profile", path: "/@applicant/dashboard/profile" },
-  { icon: FileText, label: "Applications", path: "/@applicant/dashboard/applications" },
+  { icon: Home, label: "Home", path: "/applicant/dashboard" },
+  { icon: User, label: "Profile", path: "/applicant/dashboard/profile" },
+  { icon: FileText, label: "Applications", path: "/applicant/dashboard/applications" },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {

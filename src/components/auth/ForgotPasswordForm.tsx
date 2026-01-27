@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {useForgotPassword} from "@/hooks/forgotPassword";
+import {useForgotPassword} from "@/hooks/auth/forgotPassword";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");

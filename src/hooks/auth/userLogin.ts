@@ -1,4 +1,4 @@
-import {LoginFormData} from "@/types/LoginFormData";
+import {LoginFormData} from "@/types/auth/LoginFormData";
 
 
 export const useUserLogin = () => {

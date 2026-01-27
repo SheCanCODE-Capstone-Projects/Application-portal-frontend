@@ -1,4 +1,4 @@
-import {RegisterFormData} from "@/types/register";
+import {RegisterFormData} from "@/types/auth/register";
 
 
 export const useRegister = () => {

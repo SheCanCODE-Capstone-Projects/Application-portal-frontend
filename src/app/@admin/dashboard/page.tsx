@@ -7,15 +7,29 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 
+import { useWebSocket } from "@/hooks/useWebSocket";
+
 export default function DashboardPage() {
   // ✅ Applicants data (now in state for reactivity)
-  const [applicants] = useState([
+  const [applicants, setApplicants] = useState([
     { id: '#Stud-001', date: '2025-12-02', name: 'Tabitha Kunda', status: 'Pending' },
     { id: '#Stu-002', date: '2025-12-01', name: 'Aurore Ineza', status: 'Accepted' },
     { id: '#Stu-003', date: '2025-11-30', name: 'Ritha Irakoze', status: '  Accepted' },
     { id: '#Stu-004', date: '2025-12-03', name: 'Jean Paul', status: 'Pending' },
     { id: '#Stu-005', date: '2025-11-28', name: 'Benjamin Mugisha', status: 'Rejected' },
   ]);
+
+  // WebSocket Integration
+  // Expected message format: { type: 'NEW_APPLICATION', data: { id, date, name, status } }
+  useWebSocket({
+    onMessage: (message) => {
+      if (message.type === 'NEW_APPLICATION' && message.data) {
+        setApplicants((prev) => [message.data, ...prev]);
+        // Optionally show a toast notification
+        // toast.success("New application received!");
+      }
+    }
+  });
 
   // ✅ Sort state
   const [sortOpen, setSortOpen] = useState(false);
@@ -68,13 +82,13 @@ export default function DashboardPage() {
 
   // ✅ CSV Export (improved for Excel)
   const handleDownloadCSV = () => {
-    
+
     const headers = ['Student ID', 'Date', 'Name', 'Status'];
-    const rows = applicants.map(app => 
+    const rows = applicants.map(app =>
       `"${app.id}","${app.date}","${app.name}","${app.status}"`
     );
     const csvContent = 'text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -176,11 +190,10 @@ export default function DashboardPage() {
                           setSortOption(option);
                           setSortOpen(false);
                         }}
-                        className={`block w-full text-left px-4 py-2 text-sm ${
-                          sortOption.value === option.value
+                        className={`block w-full text-left px-4 py-2 text-sm ${sortOption.value === option.value
                             ? 'bg-orange-50 text-orange-700 font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {option.label}
                       </button>
@@ -237,13 +250,12 @@ export default function DashboardPage() {
                   <td className="px-4 py-3 text-sm text-gray-900">{applicant.name}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                        applicant.status === 'Accepted'
+                      className={`inline-flex px-2 py-1 text-xs rounded-full ${applicant.status === 'Accepted'
                           ? 'bg-green-100 text-green-800'
                           : applicant.status === 'Pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
                     >
                       {applicant.status}
                     </span>
