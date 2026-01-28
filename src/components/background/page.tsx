@@ -1,4 +1,4 @@
-import {AuroraBackgroundProps} from "@/types/AuroraBackgroundProps";
+import {AuroraBackgroundProps} from "@/types/auth/AuroraBackgroundProps";
 import {cn} from "@/lib/utils";
 
 export const AuroraBackground = ({

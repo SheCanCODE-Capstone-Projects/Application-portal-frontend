@@ -1,4 +1,4 @@
-// src/components/@admin/Sidebar.tsx
+// src/components/admin/Sidebar.tsx
 'use client';
 
 import { Dispatch, SetStateAction } from 'react';
@@ -13,11 +13,11 @@ import {
 } from '@heroicons/react/24/outline';
 
 const navigation = [
-    { name: 'Dashboard', href: '/@admin/dashboard', icon: HomeIcon },
-    { name: 'Users', href: '/@admin/dashboard/users', icon: UsersIcon },
-    { name: 'Reports', href: '/@admin/dashboard/reports', icon: ChartBarIcon },
-    { name: 'Settings', href: '/@admin/dashboard/settings', icon: CogIcon },
-    { name: 'Logout', href: '/api/(auth)/logout', icon: ArrowLeftOnRectangleIcon, external: true },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+    { name: 'Users', href: '/admin/dashboard/users', icon: UsersIcon },
+    { name: 'Reports', href: '/admin/dashboard/reports', icon: ChartBarIcon },
+    { name: 'Settings', href: '/admin/dashboard/settings', icon: CogIcon },
+    { name: 'Logout', href: '/api.ts/(auth)/logout', icon: ArrowLeftOnRectangleIcon, external: true },
 ];
 
 export default function Sidebar({

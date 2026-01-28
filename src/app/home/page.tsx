@@ -7,6 +7,7 @@ import { Navbar } from "@/components/share/Navbar";
 import { X } from "lucide-react";
 import AuthSwitcher from "@/app/(auth)/AuthSwitcher/AuthSwitcher";
 import {AuroraBackground} from "@/components/background/page";
+import { ApplyNowButton } from "@/components/share/ApplyNowButton";
 export default function LandingPage() {
   const year = new Date().getFullYear();
   const [open, setOpen] = useState(false);
@@ -60,15 +61,16 @@ export default function LandingPage() {
             >
               Application Portal & Track your progress
             </motion.p>
-            <motion.button
+            <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
-                className="mt-6 rounded-full bg-[#2f573d] px-8 py-3 sm:px-10 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-lg hover:scale-105 transition-all duration-200 min-w-[160px]"
-                onClick={() => setOpen(true)}
             >
-              Apply Now
-            </motion.button>
+                <ApplyNowButton 
+                    className="mt-6 rounded-full bg-[#2f573d] px-8 py-3 sm:px-10 sm:py-4 text-lg sm:text-xl font-semibold text-white shadow-lg hover:scale-105 transition-all duration-200 min-w-[160px] disabled:opacity-70"
+                    onNeedAuth={() => setOpen(true)}
+                />
+            </motion.div>
           </motion.div>
 
           <Footer year={year} />

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authService } from "@/services/auth/auth-service";
-import {RegisterFormData} from "@/types/register";
+import {RegisterFormData} from "@/types/auth/register";
 
 export async function POST(req: Request) {
     try {

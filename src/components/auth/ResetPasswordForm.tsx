@@ -4,8 +4,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import {useRouter, useSearchParams} from "next/navigation";
 import { useState, useEffect } from "react";
-import {useResetPasswordForm} from "@/hooks/userRestForm";
-import {useResetPassword} from "@/hooks/useResetPasswordForm";
+import {useResetPasswordForm} from "@/hooks/auth/form/userRestForm";
+import {useResetPassword} from "@/hooks/auth/useResetPasswordForm";
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();

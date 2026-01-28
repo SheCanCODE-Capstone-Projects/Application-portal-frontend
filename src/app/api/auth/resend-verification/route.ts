@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authService } from "@/services/auth/auth-service";
-import {ResendVerificationRequest} from "@/types/ResendVerificationRequest";
+import {ResendVerificationRequest} from "@/types/auth/ResendVerificationRequest";
 
 
 export async function POST(req: Request) {

@@ -1,4 +1,4 @@
-// src/components/@admin/MainContent.tsx
+// src/components/admin/MainContent.tsx
 import { ReactNode } from 'react';
 
 export default function MainContent({ children }: { children: ReactNode }) {

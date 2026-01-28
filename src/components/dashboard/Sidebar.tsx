@@ -9,6 +9,7 @@ import {
   LogOut,
   GraduationCap,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -16,14 +17,15 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { icon: Home, label: "Home", path: "/@applicant/dashboard" },
-  { icon: User, label: "Profile", path: "/@applicant/dashboard/profile" },
-  { icon: FileText, label: "Applications", path: "/@applicant/dashboard/applications" },
+  { icon: Home, label: "Home", path: "/applicant/dashboard" },
+  { icon: User, label: "Profile", path: "/applicant/dashboard/profile" },
+  { icon: FileText, label: "Applications", path: "/applicant/dashboard/applications" },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout, user } = useAuth();
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -31,8 +33,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
-    router.push("/");
+    logout();
   };
 
   return (
@@ -88,7 +89,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="px-4 py-4 border-t border-green-600">
           <div className="bg-green-800 rounded-lg px-4 py-3 mb-3">
             <p className="text-xs text-green-200">Application Status</p>
-            <p className="text-sm font-semibold">Under Review</p>
+            <p className="text-sm font-semibold">{user?.applicationStatus?.replace(/_/g, " ") || "Not Started"}</p>
           </div>
 
           <button
