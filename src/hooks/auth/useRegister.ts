@@ -1,5 +1,4 @@
-import {RegisterFormData} from "@/types/auth/register";
-
+import { RegisterFormData } from "@/types/auth/register";
 
 export const useRegister = () => {
     const register = async (data: RegisterFormData) => {

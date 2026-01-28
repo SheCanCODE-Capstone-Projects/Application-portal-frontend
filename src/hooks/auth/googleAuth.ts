@@ -6,7 +6,7 @@ export const useGoogleAuth = () => {
     const sendGoogleAuth = () => {
         setLoading(true);
 
-        window.location.href = "/api/auth/google";
+        window.location.href = "/api.ts/auth/google";
     };
 
     return { loading, sendGoogleAuth };

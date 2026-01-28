@@ -1,4 +1,4 @@
-// src/components/@admin/Sidebar.tsx
+// src/components/admin/Sidebar.tsx
 'use client';
 
 import { useState } from 'react';
@@ -17,10 +17,10 @@ import {
 } from '@heroicons/react/24/outline';
 
 const navigation = [
-  { name: 'Dashboard', href: '/@admin/dashboard', icon:  Squares2X2Icon },
-  { name: 'Users', href: '/@admin/dashboard/users', icon: UsersIcon },
-  { name: 'Reports', href: '/@admin/dashboard/reports', icon: ChartBarIcon },
-  { name: 'Settings', href: '/@admin/dashboard/settings', icon: Cog6ToothIcon },
+  { name: 'Dashboard', href: '/admin/dashboard', icon:  Squares2X2Icon },
+  { name: 'Users', href: '/admin/dashboard/users', icon: UsersIcon },
+  { name: 'Reports', href: '/admin/dashboard/reports', icon: ChartBarIcon },
+  { name: 'Settings', href: '/admin/dashboard/settings', icon: Cog6ToothIcon },
 ];
 
 export default function AdminSidebar() {

@@ -1,37 +1,114 @@
+import { APPLICATION_ROUTES } from "./application-controller";
+import {
+    Application,
+    DisabilityDto, DocumentDto,
+    EducationDto, EmergencyContactDto,
+    MotivationDto,
+    PersonalInfoDto, VulnerabilityDto
+} from "@/types/application/application";
+import {api} from "@/lib/api/api";
 
 
 export const applicationService = {
-    // Fetch the current user's application
-    getMyApplication: async (token: string) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/user/applications/my-application`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
+    // Start a new application
+    startApplication: async (token: string): Promise<Application> => {
+        const res = await api.post(APPLICATION_ROUTES.START, null, {
+            headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (!res.ok) {
-            if (res.status === 404) return null; // Not found = Not applied
-            throw new Error("Failed to fetch application");
-        }
-
-        const json = await res.json();
-        return json.data; // Assuming ApiResponse structure { success: true, data: ... }
+        return res.data.data;
     },
 
-    // Admin: Fetch all applications
-    getAllApplications: async (token: string) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/applications`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-        });
+    // Get current user's application
+    getMyApplication: async (token: string): Promise<Application | null> => {
+        try {
+            const res = await api.get(APPLICATION_ROUTES.MY_APPLICATION, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return res.data.data;
+        } catch (err: any) {
+            if (err.response?.status === 404) return null;
+            throw err;
+        }
+    },
 
-        if (!res.ok) throw new Error("Failed to fetch applications");
-        const json = await res.json();
-        return json.data;
-    }
+    // Save personal info
+    savePersonalInfo: async (id: string, data: PersonalInfoDto, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.PERSONAL_INFO.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save education
+    saveEducation: async (id: string, data: EducationDto, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.EDUCATION.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save motivation
+    saveMotivation: async (id: string, data: MotivationDto, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.MOTIVATION.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save disability
+    saveDisability: async (id: string, data: DisabilityDto, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.DISABILITY.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save vulnerability
+    saveVulnerability: async (id: string, data: VulnerabilityDto, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.VULNERABILITY.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save documents
+    saveDocuments: async (id: string, data: DocumentDto[], token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.DOCUMENTS.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Save emergency contacts
+    saveEmergencyContacts: async (id: string, data: EmergencyContactDto[], token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.EMERGENCY_CONTACTS.replace("{id}", id);
+        const res = await api.put(url, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Submit application
+    submitApplication: async (id: string, token: string): Promise<Application> => {
+        const url = APPLICATION_ROUTES.SUBMIT.replace("{id}", id);
+        const res = await api.put(url, null, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data;
+    },
+
+    // Get application progress
+    getProgress: async (id: string, token: string): Promise<number> => {
+        const url = APPLICATION_ROUTES.PROGRESS.replace("{id}", id);
+        const res = await api.get(url, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data.data.percentage;
+    },
 };

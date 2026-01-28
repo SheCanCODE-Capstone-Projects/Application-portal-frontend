@@ -1,125 +1,171 @@
+// src/context/AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { User } from "@/types/auth/AuthView";
-import { useRouter } from "next/navigation";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { AuthView, User } from "@/types/auth/AuthView";
+import { useRouter, usePathname } from "next/navigation";
+import { userService, UserProfile } from "@/services/user/user-service";
 
 type AuthContextType = {
     user: User | null;
-    role: string | null;
+    userProfile: UserProfile | null;
+    view: AuthView;
+    setView: (view: AuthView) => void;
     isAuthenticated: boolean;
-    setToken: (token: string) => void;
+    loginWithToken: (token: string) => void;
+    logout: () => void;
+    checkAuth: () => Promise<void>;
+    refreshProfile: () => Promise<UserProfile | null>;
+    hasCohort: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [view, setView] = useState<AuthView>("login");
     const router = useRouter();
+    const pathname = usePathname();
     const isAuthenticated = !!user;
-    // Remove the previous 'role' const as it wasn't part of the context value type in the previous file, 
-    // or if it was, it's better to access it via user?.role if needed, but the plan didn't strictly ask to remove it from the exports if it was there.
-    // However, looking at the previous AuthContextType definition in the *read* file (Step 26), it DID have 'role'. 
-    // BUT the *new* AuthContextType in AuthView.ts (Step 61/67) DOES NOT have 'role'. 
-    // So I will remove it from the Provider value to match the type.
 
-    const decodeToken = (token: string) => {
+    const decodeToken = (token: string): any => {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload;
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            return JSON.parse(jsonPayload);
         } catch (err) {
-            console.error("Failed to decode token", err);
             return null;
         }
     };
 
-    const checkAuth = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            setUser(null);
-            return;
-        }
+    const isTokenExpired = (exp: number): boolean => {
+        // Buffer of 10 seconds to prevent edge-case failures
+        return Date.now() >= (exp * 1000) - 10000;
+    };
 
+    // Fetch user profile from API
+    const fetchUserProfile = useCallback(async (token: string): Promise<UserProfile | null> => {
         try {
-            // In a real app, we would verify the token with the backend here.
-            // For now, we decode it and mock the user state or fetch "user".
-            // If we have a user endpoint, we should use it.
-            // The plan mentioned "Add checkAuth to validate token and fetch fresh user details".
-
-            // Re-using the logic from setToken/loginWithToken for consistency, 
-            // but we might want to fetch from the API if possible.
-            // Given "don't mind the API" and "mock these fields", I will decode and hydrate.
-            const payload = decodeToken(token);
-            if (payload) {
-                // Mocking extended fields based on role/randomness or just basic hydration
-                // In a real scenario, this comes from the 'user' endpoint.
-                // Let's assume the token has some, or we fetch from 'user'.
-                // For the purpose of this task (Logic), I will try to fetch 'user' if available, otherwise hydrate from token.
-
-                setUser({
-                    id: payload.userId,
-                    email: payload.sub,
-                    role: payload.role,
-                    name: payload.sub.split("@")[0],
-                    // Mocks for logic testing - these should ideally come from backend
-                    cohort: payload.cohort || null,
-                    applicationStatus: payload.applicationStatus || "NOT_STARTED",
-                    applicationStep: payload.applicationStep || "/applicant/apply/personal-details"
-                });
-            }
-
-        } catch (error) {
-            console.error("Auth check failed", error);
-            logout();
+            const profile = await userService.me(token);
+            setUserProfile(profile);
+            return profile;
+        } catch (err) {
+            console.error("Failed to fetch user profile:", err);
+            return null;
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
-        router.push("/login");
-    };
-
-    const loginWithToken = (token: string) => {
-        localStorage.setItem("token", token);
-        const payload = decodeToken(token);
-
-        if (!payload) {
-            setUser(null);
-            return;
-        }
-
-        const currentUser: User = {
-            id: payload.userId,
-            email: payload.sub,
-            role: payload.role,
-            name: payload.sub.split("@")[0],
-            // Mocks
-            cohort: payload.cohort || null,
-            applicationStatus: payload.applicationStatus || "NOT_STARTED",
-            applicationStep: payload.applicationStep || "/applicant/apply/personal-details"
-        };
-
-        setUser(currentUser);
-
-        // Navigation Logic
-        if (payload.role === "ADMIN") {
-            router.push("/admin/dashboard");
-        } else if (payload.role === "APPLICANT") {
-            // The Guard will handle the fine-grained routing, but we can also push to a safe entry point.
-            // pushing to /applicant/dashboard or /applicant will trigger the guard.
-            router.push("/applicant/dashboard");
-        }
-    };
-
-    // Initial Auth Check
-    React.useEffect(() => {
-        checkAuth();
     }, []);
 
+    const refreshProfile = useCallback(async (): Promise<UserProfile | null> => {
+        const token = localStorage.getItem("access_token");
+        if (!token) return null;
+        return fetchUserProfile(token);
+    }, [fetchUserProfile]);
+
+    const checkAuth = useCallback(async () => {
+        const token = localStorage.getItem("access_token");
+
+        if (!token) {
+            setUser(null);
+            setUserProfile(null);
+            return;
+        }
+
+        const payload = decodeToken(token);
+
+        if (!payload || (payload.exp && isTokenExpired(payload.exp))) {
+            console.warn("Token expired or invalid session.");
+            logout();
+            return;
+        }
+
+        // Hydrate User State from JWT Payload
+        setUser({
+            id: payload.userId,
+            email: payload.sub,
+            role: payload.role, // "APPLICANT" or "ADMIN"
+            name: payload.sub.split("@")[0],
+            exp: payload.exp,
+            iat: payload.iat,
+            cohort: payload.cohort || null,
+            applicationStatus: payload.applicationStatus || "NOT_STARTED",
+            applicationStep: payload.applicationStep || "/applicant/apply"
+        });
+
+        // Fetch fresh profile from API
+        await fetchUserProfile(token);
+    }, [fetchUserProfile]);
+
+    const logout = useCallback(() => {
+        localStorage.removeItem("access_token");
+        setUser(null);
+        setUserProfile(null);
+        router.push("/login");
+    }, [router]);
+
+    const loginWithToken = useCallback(async (token: string) => {
+        localStorage.setItem("access_token", token);
+        
+        // Decode token first
+        const payload = decodeToken(token);
+        if (payload) {
+            setUser({
+                id: payload.userId,
+                email: payload.sub,
+                role: payload.role,
+                name: payload.sub.split("@")[0],
+                exp: payload.exp,
+                iat: payload.iat,
+                cohort: payload.cohort || null,
+                applicationStatus: payload.applicationStatus || "NOT_STARTED",
+                applicationStep: payload.applicationStep || "/applicant/apply"
+            });
+        }
+
+        // Fetch profile from API
+        const profile = await fetchUserProfile(token);
+
+        // Navigate based on role and cohort status
+        if (payload?.role === "ADMIN") {
+            router.push("/admin");
+        } else if (payload?.role === "APPLICANT") {
+            // Check if user has a cohort
+            if (profile && profile.cohortId && profile.cohortName) {
+                // User has cohort - go to application flow
+                router.push("/applicant/apply");
+            } else {
+                // No cohort - go to onboarding
+                router.push("/applicant/onboarding");
+            }
+        }
+    }, [fetchUserProfile, router]);
+
+    // Check auth on mount
+    useEffect(() => {
+        checkAuth();
+    }, [checkAuth]);
+
+    const hasCohort = !!(userProfile?.cohortId && userProfile?.cohortName);
+
     return (
-        <AuthContext.Provider value={{ user, view, setView, isAuthenticated, loginWithToken, logout, checkAuth }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            userProfile,
+            view, 
+            setView, 
+            isAuthenticated, 
+            loginWithToken, 
+            logout, 
+            checkAuth,
+            refreshProfile,
+            hasCohort 
+        }}>
             {children}
         </AuthContext.Provider>
     );

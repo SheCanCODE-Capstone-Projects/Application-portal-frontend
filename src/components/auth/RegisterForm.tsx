@@ -1,17 +1,15 @@
 "use client";
 
-import {GoogleIcon} from "@/components/icons/GoogleIcon";
-import {useAuth} from "@/context/AuthContext";
-import {useRegisterForm} from "@/hooks/auth/form/useRegisterForm";
-import {useEffect, useState} from "react";
-import {toast} from "sonner";
+import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { useRegisterForm } from "@/hooks/auth/form/useRegisterForm";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
-import {useRegister} from "@/hooks/auth/useRegister";
-import {useRouter} from "next/navigation";
-import {useGoogleAuth} from "@/hooks/auth/googleAuth";
+import { useRegister } from "@/hooks/auth/useRegister";
+import { useRouter } from "next/navigation";
+import { useGoogleAuth } from "@/hooks/auth/googleAuth";
 
 export default function RegisterForm() {
-  const {setView} = useAuth();
   const { register } = useRegister();
   const [formError, setFormError] = useState<string | null>(null);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -160,11 +158,10 @@ export default function RegisterForm() {
                   value={formData.username}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className={`block w-full text-[#0f5d3f] rounded-md border ${
-                    fieldErrors.username
+                  className={`block w-full text-[#0f5d3f] rounded-md border ${fieldErrors.username
                       ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                  } p-2 shadow-sm sm:text-sm`}
+                    } p-2 shadow-sm sm:text-sm`}
                 />
                 {fieldErrors.username && (
                   <p className="mt-1 text-sm text-red-600">
@@ -192,11 +189,10 @@ export default function RegisterForm() {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
-                className={`block w-full text-[#0f5d3f] rounded-md border ${
-                  fieldErrors.email
+                className={`block w-full text-[#0f5d3f] rounded-md border ${fieldErrors.email
                     ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                } p-2 shadow-sm sm:text-sm`}
+                  } p-2 shadow-sm sm:text-sm`}
               />
               {fieldErrors.email && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
@@ -221,11 +217,10 @@ export default function RegisterForm() {
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isLoading}
-                className={`block w-full text-[#0f5d3f] rounded-md border ${
-                  fieldErrors.password
+                className={`block w-full text-[#0f5d3f] rounded-md border ${fieldErrors.password
                     ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:border-[#0f5d3f] focus:ring-[#0f5d3f]"
-                } p-2 shadow-sm sm:text-sm`}
+                  } p-2 shadow-sm sm:text-sm`}
               />
               {fieldErrors.password && (
                 <p className="mt-1 text-sm text-red-600">
@@ -239,11 +234,10 @@ export default function RegisterForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`flex w-full justify-center rounded-full border border-transparent ${
-                  isLoading
+              className={`flex w-full justify-center rounded-full border border-transparent ${isLoading
                   ? "bg-[#0f5d3f] opacity-70"
                   : "bg-[#0f5d3f] hover:bg-[#0d4e35]"
-              } py-2 px-4 text-sm font-medium text-white rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2`}
+                } py-2 px-4 text-sm font-medium text-white rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2`}
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
@@ -253,8 +247,8 @@ export default function RegisterForm() {
             <p className="text-gray-600">
               Already have an account?{" "}
               <button
-                  type="button"
-                onClick={() => setView("login")}
+                type="button"
+                onClick={() => router.push("/login")}
                 className="font-semibold text-[#d97700] hover:text-[#b35f00]"
               >
                 Sign in
@@ -273,10 +267,10 @@ export default function RegisterForm() {
 
           <div className="mb-6">
             <button
-                type="button"
-                onClick={sendGoogleAuth}
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              type="button"
+              onClick={sendGoogleAuth}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0f5d3f] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <GoogleIcon className="h-8 w-8" />
               <span>{loading ? "Signing in..." : "Continue with Google"}</span>

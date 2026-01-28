@@ -1,6 +1,7 @@
 export const APPLICATION_ROUTES = {
     START: "/api/v1/user/applications/start",
     MY_APPLICATION: "/api/v1/user/applications/my-application",
+    ALL_MY_APPLICATIONS: "/api/v1/user/applications",
 
     PERSONAL_INFO: "/api/v1/user/applications/{id}/personal-info",
     EDUCATION: "/api/v1/user/applications/{id}/education",

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { LoginFormData, LoginErrors } from "@/types/auth/LoginFormData";
 import { useUserLogin } from "@/hooks/auth/userLogin";
 import { toast } from "sonner";
-import {useRouter} from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordMinLength = 8;
@@ -23,7 +23,7 @@ export const useLoginForm = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const { login } = useUserLogin();
-    const router = useRouter();
+    const { loginWithToken } = useAuth();
 
     const validate = (): boolean => {
         const newErrors: LoginErrors = {};
@@ -60,46 +60,30 @@ export const useLoginForm = () => {
         }
     };
 
-    const handleSubmit =
-        (rememberMe: boolean) =>
-            async (e: React.FormEvent<HTMLFormElement>) => {
-                e.preventDefault();
-                if (!validate()) return;
+    const handleSubmit = (rememberMe: boolean) => async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validate()) return;
 
-                try {
-                    setIsLoading(true);
-                    const result = await login(formData);
+        try {
+            setIsLoading(true);
+            const result = await login(formData);
 
-                    if (result.success) {
-                        toast.success("Login successful");
+            const token = result.access_token || result.token || result.data?.access_token || result.data?.token;
 
-                        router.push("/");
-                    } else {
-                        setErrors({
-                            email: result.message || "Login failed",
-                        });
-                        toast.error(result.message || "Login failed");
-                    }
-
-                } catch (error) {
-                    if (error instanceof Error) {
-                        setErrors({
-                            email: error.message || "Login failed",
-                        });
-                        toast.error(error.message || "Login failed");
-                    }
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-    return {
-        formData,
-        errors,
-        isLoading,
-        handleChange,
-        handleSubmit,
-        setErrors,
-        setFormData,
+            if (token) {
+                toast.success("Login successful");
+                // loginWithToken handles profile fetch and navigation
+                await loginWithToken(token);
+            } else {
+                toast.error(result.message || "Login failed");
+            }
+        } catch (error: any) {
+            const message = error.response?.data?.message || error.message || "Login failed";
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    return { formData, errors, isLoading, handleChange, handleSubmit };
 };

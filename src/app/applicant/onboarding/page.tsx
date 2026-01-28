@@ -1,219 +1,264 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
-import {AnimatePresence, motion} from "framer-motion";
-import { cn } from "@/lib/utils";
-import programs from "@/data/programe";
-import Image from "next/image";
-import {X} from "lucide-react";
-
-interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
-  children: ReactNode;
-  showRadialGradient?: boolean;
-}
-
-
-const AuroraBackground = ({
-                            className,
-                            children,
-                            showRadialGradient = true,
-                            ...props
-                          }: AuroraBackgroundProps) => {
-  return (
-      <main>
-        <div
-            className={cn(
-                "relative flex flex-col h-[100vh] items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-slate-950 transition-bg",
-                className
-            )}
-            {...props}
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            <div
-                className={cn(
-                    `
-            [--white-gradient:repeating-linear-gradient(100deg,#f0f5f0_0%,#f0f5f0_7%,transparent_10%,transparent_12%,#f0f5f0_16%)]
-            [--dark-gradient:repeating-linear-gradient(100deg,#1a2e1a_0%,#1a2e1a_7%,transparent_10%,transparent_12%,#1a2e1a_16%)]
-            [--aurora:repeating-linear-gradient(100deg,#3d5c3d_10%,#c97a1a_15%,#5a7d5a_20%,#d4a84a_25%,#4a6b4a_30%)]
-            [background-image:var(--white-gradient),var(--aurora)]
-            dark:[background-image:var(--dark-gradient),var(--aurora)]
-            [background-size:300%,_200%]
-            [background-position:50%_50%,50%_50%]
-            filter blur-[10px] invert dark:invert-0
-            after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
-            after:dark:[background-image:var(--dark-gradient),var(--aurora)]
-            after:[background-size:200%,_100%] 
-            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
-            pointer-events-none
-            absolute -inset-[10px] opacity-50 will-change-transform`,
-                    showRadialGradient &&
-                    `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,transparent_70%)]`
-                )}
-            ></div>
-          </div>
-          {children}
-        </div>
-      </main>
-  );
-};
-
-
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useCohortApplication } from "@/hooks/me/useCohortApplication";
+import { Cohort } from "@/types/cohort/cohort";
+import { 
+    Loader2, 
+    GraduationCap, 
+    Calendar, 
+    Users, 
+    ArrowRight, 
+    AlertCircle,
+    CheckCircle,
+    RefreshCw 
+} from "lucide-react";
 
 export default function OnboardingPage() {
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
-  const activeProgram = programs.find(p => p.id === selectedProgram);
-
-  return (
-      <AuroraBackground className="px-4">
-        <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center"
-        >
-          {/* HEADER */}
-          <p className="text-2xl font-bold text-green-700 mb-2">
-            Onboarding To a Cohort
-          </p>
-
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-3">
-            What kind of cohort would you like to join?
-          </h1>
-
-          <p className="text-slate-800 text-center max-w-xl mb-10">
-            Choose the program that best fits your goals and start learning with a focused cohort.
-          </p>
-
-          {/* CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 w-full place-items-center">
-            {programs.map((program, index) => {
-              const isActive = selectedProgram === program.id;
-
-              return (
-                  <motion.button
-                      key={program.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.15 }}
-                      onClick={() => setSelectedProgram(program.id)}
-                      className={cn(
-                          "group relative h-80 w-full",
-                          "rounded-2xl overflow-hidden border transition-all duration-300",
-                          "cursor-pointer hover:shadow-lg",
-                          isActive
-                              ? "border-orange-400"
-                              : "border-slate-200"
-                      )}
-                  >
-
-                    <Image
-                        src={program.image}
-                        alt={program.title}
-                        width="600"
-                        height="600"
-                        className="absolute inset-0 w-full h-full object-cover"
-                    />
+    const router = useRouter();
+    const { user, isAuthenticated, hasCohort, checkAuth, refreshProfile } = useAuth();
+    const { cohorts, loading, applying, error, fetchCohorts, applyToCohort, clearError } = useCohortApplication();
+    
+    const [selectedCohort, setSelectedCohort] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [initialized, setInitialized] = useState(false);
 
 
-                    <div className="absolute inset-0 bg-black/35 group-hover:bg-black/65 transition-all" />
+    useEffect(() => {
+        const init = async () => {
+            await checkAuth();
+            setInitialized(true);
+        };
+        init();
+    }, [checkAuth]);
 
 
-                    <div className="absolute inset-x-0 bottom-0 p-3">
-                      <h3 className="text-white text-lg font-bold text-center">
-                        {program.title}
-                      </h3>
+    useEffect(() => {
+        if (initialized && !isAuthenticated) {
+            router.push("/login?redirect=/applicant/onboarding");
+        }
+    }, [initialized, isAuthenticated, router]);
+
+    // Redirect if admin
+    useEffect(() => {
+        if (initialized && user?.role === "ADMIN") {
+            router.push("/admin");
+        }
+    }, [initialized, user, router]);
+
+    // Redirect if already has cohort
+    useEffect(() => {
+        if (initialized && hasCohort) {
+            router.push("/applicant/apply");
+        }
+    }, [initialized, hasCohort, router]);
+
+    // Fetch cohorts
+    useEffect(() => {
+        if (initialized && isAuthenticated && !hasCohort) {
+            fetchCohorts();
+        }
+    }, [initialized, isAuthenticated, hasCohort, fetchCohorts]);
+
+    const handleApply = async () => {
+        if (!selectedCohort) return;
+
+        clearError();
+        const result = await applyToCohort(selectedCohort);
+        
+        if (result) {
+            setSuccess(true);
+            // Refresh profile to get updated cohort info
+            await refreshProfile();
+            // Navigate to application page after short delay
+            setTimeout(() => {
+                router.push("/applicant/apply");
+            }, 1500);
+        }
+    };
+
+    // Loading state
+    if (!initialized || (loading && cohorts.length === 0)) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading available programs...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Success state
+    if (success) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+                <div className="text-center bg-white p-8 rounded-2xl shadow-lg max-w-md">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle className="w-10 h-10 text-green-600" />
                     </div>
-                  </motion.button>
-              );
-            })}
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Successfully Enrolled!</h2>
+                    <p className="text-gray-600 mb-4">
+                        You&apos;ve been enrolled in the program. Redirecting to your application...
+                    </p>
+                    <Loader2 className="w-6 h-6 animate-spin text-green-600 mx-auto" />
+                </div>
+            </div>
+        );
+    }
 
-              <AnimatePresence>
-                  {activeProgram && (
-                      <motion.div
-                          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                      >
-                          <motion.div
-                              className="relative w-full max-w-3xl bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 overflow-y-auto max-h-[80vh]"
-                              initial={{ scale: 0.95, y: 20 }}
-                              animate={{ scale: 1, y: 0 }}
-                              exit={{ scale: 0.95, y: 20 }}
-                              transition={{ duration: 0.2, type: "spring", stiffness: 600, damping: 32 }}
-                          >
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-8 px-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <GraduationCap className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                        Welcome to Igire Rwanda!
+                    </h1>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                        Choose a program to begin your application journey. Select the cohort that best fits your schedule.
+                    </p>
+                </div>
 
-                              <button
-                                  className="absolute top-6 right-5 text-gray-700 hover:text-gray-900 rounded-full border border-gray-300 shadow"
-                                  onClick={() => setSelectedProgram(null)}
-                              >
-                                  <X size={20} />
-                              </button>
+                {/* Error Banner */}
+                {error && (
+                    <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                        <p className="text-red-700 flex-1">{error}</p>
+                        <button 
+                            onClick={clearError}
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
 
+                {/* Cohorts Grid */}
+                {cohorts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        {cohorts.map((cohort) => (
+                            <CohortCard
+                                key={cohort.id}
+                                cohort={cohort}
+                                selected={selectedCohort === cohort.id}
+                                onSelect={() => setSelectedCohort(cohort.id)}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Calendar className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Programs Available</h3>
+                        <p className="text-gray-600 mb-4">
+                            There are no open programs at the moment. Please check back later.
+                        </p>
+                        <button
+                            onClick={fetchCohorts}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-green-600 hover:text-green-700"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            Refresh
+                        </button>
+                    </div>
+                )}
 
-                              <div className="flex items-center space-x-4 mb-4">
-                                  {activeProgram.icon && (
-                                      <activeProgram.icon className={`w-8 h-8 text-orange-500`} />
-                                  )}
-                                  <h2 className="text-2xl font-bold">{activeProgram.title}</h2>
-                              </div>
+                {/* Apply Button */}
+                {cohorts.length > 0 && (
+                    <div className="flex justify-center">
+                        <button
+                            onClick={handleApply}
+                            disabled={!selectedCohort || applying}
+                            className="px-8 py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg transition-all flex items-center gap-2"
+                        >
+                            {applying ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Enrolling...
+                                </>
+                            ) : (
+                                <>
+                                    Continue to Application
+                                    <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
 
-                              {/* DESCRIPTION */}
-                              <p className="text-gray-800 dark:text-gray-200 mb-4">
-                                  {activeProgram.description}
-                              </p>
+interface CohortCardProps {
+    cohort: Cohort;
+    selected: boolean;
+    onSelect: () => void;
+}
 
-                              {/* LANGUAGES */}
-                              {activeProgram.languages && activeProgram.languages.length > 0 && (
-                                  <div className="mb-4">
-                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                          Languages & Tools:
-                                      </h3>
-                                      <div className="flex flex-wrap gap-3">
-                                          {activeProgram.languages.map((lang, idx) => {
-                                              const Icon = lang.icon;
-                                              return (
-                                                  <div
-                                                      key={idx}
-                                                      className="flex items-center gap-1 px-2 py-1"
-                                                  >
-                                                      <Icon className="w-5 h-5 text-green-600" />
-                                                      <span className="text-gray-700 dark:text-gray-300 text-sm">{lang.name}</span>
-                                                  </div>
-                                              );
-                                          })}
-                                      </div>
-                                  </div>
-                              )}
+function CohortCard({ cohort, selected, onSelect }: CohortCardProps) {
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "TBD";
+        return new Date(dateString).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+    };
 
-                              {/* DURATION & SCHEDULE */}
-                              <div className="flex flex-col mb-6">
-                                  <div className="flex items-center space-x-4">
-                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">Duration:</h3>
-                                      <p className="text-gray-700 dark:text-gray-300">{activeProgram.duration}</p>
-                                  </div>
-                                  <div className="flex items-center space-x-4">
-                                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">Schedule:</h3>
-                                      <p className="text-gray-700 dark:text-gray-300">{activeProgram.schedule}</p>
-                                  </div>
-                              </div>
+    return (
+        <div
+            onClick={onSelect}
+            className={`bg-white rounded-2xl shadow-sm p-6 cursor-pointer transition-all border-2 ${
+                selected 
+                    ? "border-green-500 ring-2 ring-green-200" 
+                    : "border-transparent hover:border-green-200"
+            }`}
+        >
+            <div className="flex items-start justify-between mb-4">
+                <div>
+                    <h3 className="text-xl font-bold text-gray-900">{cohort.name}</h3>
+                    <p className="text-gray-500 text-sm">{cohort.description || "SheCanCODE Bootcamp"}</p>
+                </div>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                    selected ? "border-green-500 bg-green-500" : "border-gray-300"
+                }`}>
+                    {selected && <CheckCircle className="w-4 h-4 text-white" />}
+                </div>
+            </div>
 
-                              {/* CONTINUE BUTTON */}
-                              <button
-                                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full w-full"
-                                  onClick={() => {
+            <div className="space-y-3">
+                <div className="flex items-center gap-3 text-gray-600">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <div>
+                        <p className="text-sm font-medium">Application Deadline</p>
+                        <p className="text-sm">{formatDate(cohort.endDate)}</p>
+                    </div>
+                </div>
 
-                                      console.log("Continue clicked for", activeProgram.title);
-                                  }}
-                              >
-                                  Continue
-                              </button>
-                          </motion.div>
-                      </motion.div>
-                  )}
-              </AnimatePresence>
-          </div>
-        </motion.div>
-      </AuroraBackground>
-  );
+                <div className="flex items-center gap-3 text-gray-600">
+                    <Users className="w-5 h-5 text-green-600" />
+                    <div>
+                        <p className="text-sm font-medium">Program Start</p>
+                        <p className="text-sm">{formatDate(cohort.startDate)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {cohort.status === "OPEN" && (
+                <div className="mt-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        Open for Applications
+                    </span>
+                </div>
+            )}
+        </div>
+    );
 }

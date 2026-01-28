@@ -1,8 +1,8 @@
 import {AUTH_ROUTES} from "@/services/auth/auth-controller";
-import {api} from "@/lib/auth/authapi";
 import {RestFormData} from "@/types/auth/RestFormData";
 import {LoginFormData} from "@/types/auth/LoginFormData";
 import {RegisterFormData} from "@/types/auth/register";
+import {api} from "@/lib/api/api";
 
 
 export const authService = {
@@ -32,8 +32,7 @@ export const authService = {
     },
 
     login: async (payload: LoginFormData) => {
-        const res = await api.post(AUTH_ROUTES.LOGIN, payload);
-        return res.data;
+        return await api.post(AUTH_ROUTES.LOGIN, payload);
     },
 };
 

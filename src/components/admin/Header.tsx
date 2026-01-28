@@ -1,4 +1,4 @@
-// src/components/@admin/Header.tsx
+// src/components/admin/Header.tsx
 'use client';
 
 import { Dispatch, SetStateAction, useState } from 'react';
