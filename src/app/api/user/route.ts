@@ -1,10 +1,10 @@
 import { userService } from "@/services/user/user-service";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers"; // Import cookies
+import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
     try {
-        // 1. Try to get token from cookies first
+
         const cookieStore = await cookies();
         const tokenCookie = cookieStore.get("token") || cookieStore.get("accessToken");
         let token = tokenCookie?.value;

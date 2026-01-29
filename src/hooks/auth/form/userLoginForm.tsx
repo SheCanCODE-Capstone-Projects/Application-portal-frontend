@@ -72,7 +72,7 @@ export const useLoginForm = () => {
 
             if (token) {
                 toast.success("Login successful");
-                // loginWithToken handles profile fetch and navigation
+
                 await loginWithToken(token);
             } else {
                 toast.error(result.message || "Login failed");
