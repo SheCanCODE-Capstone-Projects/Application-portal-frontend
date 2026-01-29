@@ -1,167 +1,73 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { StepProps } from '../types/form.types';
-import { ChevronRight, Upload, X } from 'lucide-react';
+import { useState } from "react";
+import { FileText, ArrowRight, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import { DocumentDto } from "@/types/application/application";
 
-const DocumentsStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, onBack }) => {
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'cv' | 'coverLetter') => {
-    const file = e.target.files?.[0];
-    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
-      updateFormData({ [fieldName]: file });
-    } else {
-      alert('Please upload only PDF or JPG files');
-    }
-  };
+export default function DocumentsStep({ onNext, onBack, saving }: any) {
+  const [docs, setDocs] = useState<DocumentDto[]>([
+    { docType: "NATIONAL_ID", fileUrl: "" }
+  ]);
 
-  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []).filter(
-      (file) => file.type === 'application/pdf' || file.type.startsWith('image/')
-    );
-    updateFormData({ certificates: [...formData.certificates, ...files] });
-  };
+  const docTypes = ["NATIONAL_ID", "DEGREE_CERTIFICATE", "TRANSCRIPT", "CV", "OTHER"];
 
-  const removeCertificate = (index: number) => {
-    updateFormData({
-      certificates: formData.certificates.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.cv) {
-      alert('Please upload your CV');
-      return;
-    }
-    onNext();
+  const addDoc = () => setDocs([...docs, { docType: "OTHER", fileUrl: "" }]);
+  const removeDoc = (index: number) => setDocs(docs.filter((_, i) => i !== index));
+  const updateDoc = (index: number, field: keyof DocumentDto, value: string) => {
+    const newDocs = [...docs];
+    newDocs[index] = { ...newDocs[index], [field]: value };
+    setDocs(newDocs);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-      {/* CV Upload */}
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-          CV / Resume <span className="text-red-500">*</span>
-        </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-emerald-500 transition">
-          <Upload className="mx-auto mb-2 text-gray-400" size={28} />
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg"
-            onChange={(e) => handleFileUpload(e, 'cv')}
-            className="hidden"
-            id="cv-upload"
-          />
-          <label
-            htmlFor="cv-upload"
-            className="cursor-pointer text-emerald-700 text-sm sm:text-base font-medium hover:text-emerald-800"
-          >
-            {formData.cv ? (
-              <span className="text-gray-700 break-all">✓ {formData.cv.name}</span>
-            ) : (
-              'Click to upload CV'
-            )}
-          </label>
-          <p className="text-xs text-gray-500 mt-2">PDF or JPG, max 10MB</p>
-        </div>
-      </div>
-
-      {/* Cover Letter Upload */}
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-          Cover Letter
-        </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-emerald-500 transition">
-          <Upload className="mx-auto mb-2 text-gray-400" size={28} />
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg"
-            onChange={(e) => handleFileUpload(e, 'coverLetter')}
-            className="hidden"
-            id="cover-upload"
-          />
-          <label
-            htmlFor="cover-upload"
-            className="cursor-pointer text-emerald-700 text-sm sm:text-base font-medium hover:text-emerald-800"
-          >
-            {formData.coverLetter ? (
-              <span className="text-gray-700 break-all">✓ {formData.coverLetter.name}</span>
-            ) : (
-              'Click to upload Cover Letter'
-            )}
-          </label>
-          <p className="text-xs text-gray-500 mt-2">Optional</p>
-        </div>
-      </div>
-
-      {/* Certificates Upload */}
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-          Certificates
-        </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-emerald-500 transition">
-          <Upload className="mx-auto mb-2 text-gray-400" size={28} />
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg"
-            multiple
-            onChange={handleMultipleFileUpload}
-            className="hidden"
-            id="cert-upload"
-          />
-          <label
-            htmlFor="cert-upload"
-            className="cursor-pointer text-emerald-700 text-sm sm:text-base font-medium hover:text-emerald-800"
-          >
-            Click to upload Certificates
-          </label>
-          <p className="text-xs text-gray-500 mt-2">Multiple files allowed</p>
-        </div>
-        
-        {/* Certificate List */}
-        {formData.certificates.length > 0 && (
-          <div className="mt-3 sm:mt-4 space-y-2">
-            {formData.certificates.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg"
-              >
-                <span className="text-xs sm:text-sm text-gray-700 truncate flex-1 mr-2">
-                  {file.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeCertificate(index)}
-                  className="text-red-500 hover:text-red-700 flex-shrink-0 p-1"
-                  aria-label="Remove certificate"
-                >
-                  <X size={16} className="sm:w-4 sm:h-4" />
-                </button>
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-4">
+          {docs.map((doc, index) => (
+              <div key={index} className="p-6 border border-gray-200 rounded-3xl flex flex-col md:flex-row gap-4 items-end bg-gray-50/30">
+                <div className="flex-1 space-y-2 w-full">
+                  <label className="text-[10px] font-black text-emerald-800 uppercase tracking-widest ml-1">Document Type</label>
+                  <select
+                      className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                      value={doc.docType}
+                      onChange={(e) => updateDoc(index, 'docType', e.target.value)}
+                  >
+                    {docTypes.map(t => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+                  </select>
+                </div>
+                <div className="flex-[2] space-y-2 w-full">
+                  <label className="text-[10px] font-black text-emerald-800 uppercase tracking-widest ml-1">File URL / Link</label>
+                  <input
+                      className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="https://drive.google.com/..."
+                      value={doc.fileUrl}
+                      onChange={(e) => updateDoc(index, 'fileUrl', e.target.value)}
+                  />
+                </div>
+                {docs.length > 1 && (
+                    <button onClick={() => removeDoc(index)} className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                      <Trash2 size={20} />
+                    </button>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
 
-      {/* Navigation */}
-      <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 sm:gap-0 pt-4 sm:pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-emerald-700 font-medium hover:bg-emerald-50 rounded-lg transition"
-        >
-          Back
+        <button onClick={addDoc} className="flex items-center gap-2 text-emerald-700 font-bold text-sm hover:underline ml-2">
+          <Plus size={18} /> Add Another Document
         </button>
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition flex items-center justify-center gap-2"
-        >
-          Next
-          <ChevronRight size={18} className="sm:w-5 sm:h-5" />
-        </button>
+
+        <div className="flex gap-4 pt-6 border-t border-gray-100">
+          <button onClick={onBack} className="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2">
+            <ArrowLeft size={18} /> Back
+          </button>
+          <button
+              onClick={() => onNext(docs)}
+              disabled={saving || docs.some(d => !d.fileUrl)}
+              className="flex-[2] py-4 bg-[#0f5d3f] hover:bg-[#0a4330] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="animate-spin" /> : <>Save & Continue <ArrowRight size={18} /></>}
+          </button>
+        </div>
       </div>
-    </form>
   );
-};
-
-export default DocumentsStep;
+}

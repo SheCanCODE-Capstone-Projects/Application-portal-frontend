@@ -78,3 +78,14 @@ export interface VulnerabilityDto {
     hasChildcareNeeds: boolean;
     description?: string;
 }
+
+export interface DisabilityDto {
+    hasDisability: boolean;
+    disabilityType?: string;
+    disabilityDescription?: string;
+}
+
+export interface DocumentDto {
+    docType: string;
+    fileUrl: string; // Backend expects a URL string
+}
