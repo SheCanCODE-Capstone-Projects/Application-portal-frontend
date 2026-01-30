@@ -1,63 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Calendar, ArrowRight, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
-import { userService, UserProfile, Application, ApplicationProgress } from '@/services/user';
+import { useEffect } from 'react';
+import { Calendar, ArrowRight, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 export default function DashboardPage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [progress, setProgress] = useState<ApplicationProgress | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [profileData, applicationsData] = await Promise.all([
-          userService.getProfile(),
-          userService.getApplications()
-        ]);
-        
-        setProfile(profileData);
-        setApplications(applicationsData);
-        
-        if (applicationsData.length > 0) {
-          const progressData = await userService.getApplicationProgress(applicationsData[0].id);
-          setProgress(progressData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        // Set fallback data when API fails
-        setProfile({
-          id: 'APP-2025-001',
-          name: 'Demo User',
-          email: 'demo@example.com',
-          phone: '+250 788 123 456',
-          role: 'applicant'
-        });
-        setApplications([{
-          id: 'APP-2025-001',
-          title: 'Software Engineering Program',
-          status: 'under_review',
-          submittedAt: '2024-12-15T00:00:00Z',
-          cohort: 'Spring 2025'
-        }]);
-        setProgress({
-          id: 'APP-2025-001',
-          personalInfo: 100,
-          academicHistory: 100,
-          references: 75,
-          documents: 50,
-          overall: 75
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const { profile, applications, progress, loading, error } = useDashboardData();
+  
   const currentApplication = applications[0];
   const currentDate = new Date();
   const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
@@ -65,34 +14,33 @@ export default function DashboardPage() {
   const today = currentDate.getDate();
   const daysInMonth = new Date(currentYear, currentDate.getMonth() + 1, 0).getDate();
 
-  // Real-time date updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Force re-render every minute to update current time
-      setLoading(false);
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
           </div>
         </div>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <h3 className="text-red-800 font-semibold mb-2">Error Loading Dashboard</h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Profile Overview Card */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -106,13 +54,13 @@ export default function DashboardPage() {
               View Full Application
             </button>
           </div>
-          {/* <div className="flex-shrink-0">
+          <div className="flex-shrink-0">
             <div className="w-32 h-32 bg-green-50 rounded-lg flex items-center justify-center">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-3xl"></span>
+                <span className="text-3xl">📋</span>
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
 
@@ -288,7 +236,6 @@ export default function DashboardPage() {
           </div>
 
         </div>
-      </div>
       </div>
     </div>
   );

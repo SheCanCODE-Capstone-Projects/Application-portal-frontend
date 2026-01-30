@@ -1,19 +1,15 @@
-import { apiClient } from './api';
-import { apiConfig } from '../lib/api';
-
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  avatar?: string;
+  phone: string;
   role: string;
 }
 
 export interface Application {
   id: string;
   title: string;
-  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  status: string;
   submittedAt: string;
   cohort: string;
 }
@@ -27,18 +23,50 @@ export interface ApplicationProgress {
   overall: number;
 }
 
-class UserService {
+export const userService = {
   async getProfile(): Promise<UserProfile> {
-    return apiClient.get<UserProfile>('/api/v1/users/me');
-  }
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          id: 'APP-2025-001',
+          name: 'Demo User',
+          email: 'demo@example.com',
+          phone: '+250 788 123 456',
+          role: 'applicant'
+        });
+      }, 500);
+    });
+  },
 
   async getApplications(): Promise<Application[]> {
-    return apiClient.get<Application[]>('/api/v1/user/applications/my-application');
-  }
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([{
+          id: 'APP-2025-001',
+          title: 'Software Engineering Program',
+          status: 'under_review',
+          submittedAt: '2024-12-15T00:00:00Z',
+          cohort: 'Spring 2025'
+        }]);
+      }, 500);
+    });
+  },
 
-  async getApplicationProgress(id: string): Promise<ApplicationProgress> {
-    return apiClient.get<ApplicationProgress>(`/api/v1/user/applications/${id}/progress`);
+  async getApplicationProgress(applicationId: string): Promise<ApplicationProgress> {
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          id: applicationId,
+          personalInfo: 100,
+          academicHistory: 100,
+          references: 75,
+          documents: 50,
+          overall: 75
+        });
+      }, 500);
+    });
   }
-}
-
-export const userService = new UserService();
+};
