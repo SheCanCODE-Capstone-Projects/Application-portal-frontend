@@ -1,6 +1,7 @@
-import RegisterForm from "@/app/components/auth/RegisterForm";
+import RegisterForm from "@/components/auth/RegisterForm";
 
 import { Metadata } from 'next';
+import {AuroraBackground} from "@/components/background/page";
 
 export const metadata: Metadata = {
   title: "Create an Account | SheCanCODE",
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return (
+      <AuroraBackground className="px-3 sm:px-4">
+      <RegisterForm />
+        </AuroraBackground>
+  )
 }

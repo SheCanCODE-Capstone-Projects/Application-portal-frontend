@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import EmailVerification from "@/app/components/auth/EmailVerification";
+import EmailVerification from "@/components/auth/EmailVerification";
+import {AuroraBackground} from "@/components/background/page";
 
 export const metadata: Metadata = {
   title: "Verify Email | SheCanCODE",
@@ -7,5 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default function VerifyEmailPage() {
-  return <EmailVerification />;
+
+  return (
+      <>
+        <AuroraBackground className="px-3 sm:px-4">
+        <EmailVerification />;
+        </AuroraBackground>
+      </>
+
+  )
 }
