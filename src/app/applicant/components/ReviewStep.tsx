@@ -12,7 +12,9 @@ import {
   FileText,
   Phone,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Accessibility,
+  ShieldAlert
 } from "lucide-react";
 import { applicationService } from "@/services/application/application-service";
 import { Application } from "@/types/application/application";
@@ -22,7 +24,6 @@ interface ReviewStepProps {
   onSubmit: () => void;
   onBack: () => void;
   saving: boolean;
-  // Optional: If you want to allow jumping to specific steps in the future
   goToStep?: (step: number) => void;
 }
 
@@ -36,7 +37,6 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        // Fetch the full application object with all nested DTOs
         const data = await applicationService.getMyApplication(token);
         setAppData(data);
       } catch (error) {
@@ -74,7 +74,15 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
     );
   }
 
-  const { personalInfo, education, motivation, documents, emergencyContacts } = appData;
+  const {
+    personalInfo,
+    education,
+    motivation,
+    documents,
+    emergencyContacts,
+    disability,
+    vulnerability
+  } = appData;
 
   const SectionHeader = ({ icon: Icon, title, step }: { icon: any, title: string, step?: number }) => (
       <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2 mt-8 first:mt-0">
@@ -141,6 +149,16 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
                     <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Marital Status</span>
                     <p className="font-medium text-gray-800">{personalInfo.maritalStatus || 'N/A'}</p>
                   </div>
+                  <div>
+                    <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Social Links</span>
+                    <p className="font-medium text-gray-800 truncate">{personalInfo.socialLinks || 'N/A'}</p>
+                  </div>
+                  {personalInfo.additionalInformation && (
+                      <div className="md:col-span-2">
+                        <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Additional Information</span>
+                        <p className="font-medium text-gray-800 bg-gray-50 p-3 rounded-xl">{personalInfo.additionalInformation}</p>
+                      </div>
+                  )}
                 </div>
             ) : <p className="text-red-400 text-sm italic">Information missing</p>}
           </div>
@@ -160,7 +178,11 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
                   </div>
                   <div>
                     <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Current Occupation</span>
-                    <p className="font-medium text-gray-800">{education.occupation}</p>
+                    <p className="font-medium text-gray-800">{education.occupation || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Employment Status</span>
+                    <p className="font-medium text-gray-800">{education.employmentStatus || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Experience</span>
@@ -214,9 +236,57 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
             ) : <p className="text-gray-400 text-sm italic">No documents uploaded</p>}
           </div>
 
-          {/* 5. Emergency Contacts */}
+          {/* 5. Disability */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <SectionHeader icon={Phone} title="Emergency Contacts" step={5} />
+            <SectionHeader icon={Accessibility} title="Disability Information" step={5} />
+            {disability ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                  <div>
+                    <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Has Disability?</span>
+                    <p className="font-medium text-gray-800">{disability.hasDisability ? "Yes" : "No"}</p>
+                  </div>
+                  {disability.hasDisability && (
+                      <>
+                        <div>
+                          <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Type</span>
+                          <p className="font-medium text-gray-800">{disability.disabilityType || 'N/A'}</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Accommodations Needed</span>
+                          <p className="font-medium text-gray-800 bg-gray-50 p-3 rounded-xl">{disability.disabilityDescription || 'None specified'}</p>
+                        </div>
+                      </>
+                  )}
+                </div>
+            ) : <p className="text-gray-400 text-sm italic">No information provided</p>}
+          </div>
+
+          {/* 6. Vulnerability */}
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <SectionHeader icon={ShieldAlert} title="Socioeconomic Information" step={6} />
+            {vulnerability ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                  <div>
+                    <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Household Income</span>
+                    <p className="font-medium text-gray-800">{vulnerability.householdIncome?.replace(/_/g, " ") || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Childcare Needs?</span>
+                    <p className="font-medium text-gray-800">{vulnerability.hasChildcareNeeds ? "Yes" : "No"}</p>
+                  </div>
+                  {vulnerability.description && (
+                      <div className="md:col-span-2">
+                        <span className="block text-gray-400 text-xs uppercase tracking-wider mb-1">Description</span>
+                        <p className="font-medium text-gray-800 bg-gray-50 p-3 rounded-xl">{vulnerability.description}</p>
+                      </div>
+                  )}
+                </div>
+            ) : <p className="text-gray-400 text-sm italic">No information provided</p>}
+          </div>
+
+          {/* 7. Emergency Contacts */}
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <SectionHeader icon={Phone} title="Emergency Contacts" step={7} />
             {emergencyContacts && emergencyContacts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {emergencyContacts.map((contact, idx) => (

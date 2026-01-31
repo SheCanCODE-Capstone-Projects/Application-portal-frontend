@@ -31,13 +31,11 @@ import { usePagination } from '@/hooks/use-pagination'
 
 export type Item = {
   id: string
-  avatar: string
-  avatarFallback: string
   name: string
   email: string
-  amount: number
-  status: 'pending' | 'processing' | 'paid' | 'failed'
-  paidBy: 'mastercard' | 'visa'
+  status: number
+  avatarFallback: 'pending' | 'processing' | 'paid' | 'failed'
+  date: 'mastercard' | 'visa'
 }
 
 export const columns: ColumnDef<Item>[] = [

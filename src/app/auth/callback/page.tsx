@@ -15,8 +15,7 @@ function CallbackContent() {
         const error = searchParams.get("error");
 
         if (token) {
-            // Use the existing logic from AuthContext to handle storage,
-            // user hydration, and redirection based on role (Admin/Applicant)
+
             loginWithToken(token)
                 .catch((err) => {
                     console.error("Google login processing failed:", err);
