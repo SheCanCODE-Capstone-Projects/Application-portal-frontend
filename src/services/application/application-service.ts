@@ -26,6 +26,7 @@ export const applicationService = {
             });
             return res.data.data;
         } catch (err: any) {
+            // If backend returns 404, return null so logic can proceed to startApplication
             if (err.response?.status === 404) return null;
             throw err;
         }

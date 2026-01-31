@@ -1,97 +1,79 @@
-// src/components/admin/Sidebar.tsx
-'use client';
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 
-import { Dispatch, SetStateAction } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
-    HomeIcon,
-    UsersIcon,
-    ChartBarIcon,
-    CogIcon,
-    ArrowLeftOnRectangleIcon,
-} from '@heroicons/react/24/outline';
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar"
 
-const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
-    { name: 'Users', href: '/admin/dashboard/users', icon: UsersIcon },
-    { name: 'Reports', href: '/admin/dashboard/reports', icon: ChartBarIcon },
-    { name: 'Settings', href: '/admin/dashboard/settings', icon: CogIcon },
-    { name: 'Logout', href: '/api.ts/(auth)/logout', icon: ArrowLeftOnRectangleIcon, external: true },
-];
+const items = [
+    {
+        title: "Home",
+        url: "#",
+        icon: Home,
+    },
+    {
+        title: "Inbox",
+        url: "#",
+        icon: Inbox,
+    },
+    {
+        title: "Calendar",
+        url: "#",
+        icon: Calendar,
+    },
+    {
+        title: "Search",
+        url: "#",
+        icon: Search,
+    },
+    {
+        title: "Settings",
+        url: "#",
+        icon: Settings,
+    },
+]
 
-export default function Sidebar({
-                                    sidebarOpen,
-                                    setSidebarOpen,
-                                }: {
-    sidebarOpen: boolean;
-    setSidebarOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-    const pathname = usePathname();
-
+export function AppSidebar() {
     return (
-        <>
-            {/* Mobile sidebar backdrop */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
+        <Sidebar className="h-screen border-r bg-muted/40">
+            <SidebarContent className="px-3 py-4">
+                <SidebarGroup>
+                    <SidebarGroupLabel className="mb-2 px-2 text-md font-semibold uppercase tracking-wide text-muted-foreground">
+                        Application
+                    </SidebarGroupLabel>
 
-            {/* Sidebar */}
-            <div
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white text-black transform ${
-                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                } lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out`}
-            >
-                <div className="flex h-full flex-col">
-                    {/* Logo / Brand */}
-                    <div className="flex h-16 items-center justify-center bg-white">
-                        <span className="text-xl font-bold text-black">Admin Dashboard</span>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className="flex-1 px-4 py-6">
-                        <ul className="space-y-2">
-                            {navigation.map((item) => {
-                                const isActive = pathname === item.href;
-                                const Icon = item.icon;
-                                return (
-                                    <li key={item.name}>
-                                        {item.external ? (
-                                            <a
-                                                href={item.href}
-                                                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
-                                                    isActive
-                                                        ? 'bg-orange-500'
-                                                        : 'hover:bg-orange-400 hover:bg-opacity-80'
-                                                }`}
-                                            >
-                                                <Icon className="h-5 w-5" aria-hidden="true" />
-                                                {item.name}
-                                            </a>
-                                        ) : (
-                                            <Link
-                                                href={item.href}
-                                                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
-                                                    isActive
-                                                        ? 'bg-orange-500'
-                                                        : 'hover:bg-orange-400 hover:bg-opacity-80'
-                                                }`}
-                                                onClick={() => setSidebarOpen(false)}
-                                            >
-                                                <Icon className="h-5 w-5" aria-hidden="true" />
-                                                {item.name}
-                                            </Link>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </>
-    );
+                    <SidebarGroupContent>
+                        <SidebarMenu className="space-y-1">
+                            {items.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        className="
+                  flex items-center gap-3 rounded-lg px-3 py-2
+                  text-md font-medium text-muted-foreground
+                  transition-all
+                  hover:bg-primary/10 hover:text-primary
+                  data-[active=true]:bg-primary/15
+                  data-[active=true]:text-primary
+                "
+                                    >
+                                        <a href={item.url}>
+                                            <item.icon className="h-16 w-16" />
+                                            <span>{item.title}</span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+        </Sidebar>
+    )
 }

@@ -48,8 +48,11 @@ export const adminService = {
     },
 
     updateApplicationStatus: async (token: string, id: string, status: ApplicationStatus): Promise<Application> => {
-        const url = ADMIN_ROUTES.UPDATE_APPLICATION_STATUS.replace("{id}", id);
-        const res = await api.put(url, { status }, {
+        const endpoint = (status === ApplicationStatus.ACCEPTED || status === ApplicationStatus.APPROVED)
+            ? `/api/v1/admin/applications/${id}/accept`
+            : `/api/v1/admin/applications/${id}/reject`;
+
+        const res = await api.put(endpoint, {}, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return res.data.data;

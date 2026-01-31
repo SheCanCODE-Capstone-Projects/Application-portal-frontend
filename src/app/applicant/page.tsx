@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { applicationService } from "@/services/application/application-service";
 import { Application, ApplicationStatus } from "@/types/application/application";
 import { Loader2, CheckCircle, AlertCircle, GraduationCap, ArrowRight, RefreshCw } from "lucide-react";
+import {toast} from "sonner";
 
 type CheckStatus = "checking" | "no-cohort" | "no-application" | "has-application" | "submitted" | "error";
 
@@ -90,7 +91,7 @@ export default function ApplicantAuthenticator() {
                     setTimeout(() => router.push("/applicant/dashboard"), 1500);
                 } else {
                     setStatus("has-application");
-                    // Determine step and redirect
+
                     const step = determineStep(app);
                     setTimeout(() => router.push(`/applicant/apply?step=${step}&id=${app.id}`), 1500);
                 }
@@ -128,6 +129,7 @@ export default function ApplicantAuthenticator() {
                 return;
             }
             const newApp = await applicationService.startApplication(token);
+
             router.push(`/applicant/apply?step=1&id=${newApp.id}`);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to start application");

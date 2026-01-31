@@ -1,160 +1,119 @@
 "use client";
 
 import React, { useEffect } from "react";
-import {
-    Users,
-    Package,
-    Zap,
-    ArrowUpRight,
-    ArrowDownRight,
-    Ban,
-    AlertCircle,
-    RefreshCw
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Users, GraduationCap, Ban, CheckCircle, TrendingUp, ArrowRight } from "lucide-react";
 import { useAdminDashboard } from "@/hooks/admin/useAdminDashboard";
+import { useAdminApplications } from "@/hooks/admin/useAdminApplications";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import Application from "@/app/admin/componets/Application";
-import SystemRejects from "@/app/admin/componets/systemRejects";
-import SystemReport from "@/app/admin/componets/systemreport";
+import StatisticsCard from "@/components/admin/statistics-card-01"; // Ensure this accepts props below
+import SalesMetricsCard from "@/components/admin/chart-sales-metrics"; // Renaming to ApplicationTrends recommended
+import TransactionDatatable from "@/components/admin/datatable-transaction";
+import { Card, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function DashboardPage() {
-    const { stats, loading, error, fetchStats } = useAdminDashboard();
+    const { stats, fetchStats } = useAdminDashboard();
+    const { applications, fetchApplications } = useAdminApplications();
 
-    // WebSocket for real-time updates
-    const { isConnected, lastMessage } = useWebSocket({
+    // Real-time synchronization via WebSockets
+    useWebSocket({
         onMessage: (data) => {
-            if (data.type === "STATS_UPDATE" || data.type === "APPLICATION_UPDATE") {
+            if (data.type === "APPLICATION_UPDATE" || data.type === "STATS_UPDATE") {
                 fetchStats();
+                fetchApplications();
             }
         },
     });
 
     useEffect(() => {
         fetchStats();
-    }, [fetchStats]);
+        fetchApplications();
+    }, [fetchStats, fetchApplications]);
 
-    if (loading && !stats) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                <p className="text-slate-400">Loading dashboard...</p>
-            </div>
-        );
-    }
-
-    if (error && !stats) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-white">
-                <AlertCircle className="w-16 h-16 text-red-400" />
-                <h2 className="text-xl font-semibold">Failed to load dashboard</h2>
-                <p className="text-slate-400">{error}</p>
-                <Button onClick={fetchStats} variant="outline" className="mt-4">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Try Again
-                </Button>
-            </div>
-        );
-    }
+    const metrics = [
+        {
+            icon: <Users className="text-blue-600" />,
+            title: "Total Applicants",
+            value: stats?.totalApplicants?.toString() || "0",
+            changePercentage: stats?.trends?.applicants || "+0%"
+        },
+        {
+            icon: <GraduationCap className="text-purple-600" />,
+            title: "Active Programs",
+            value: stats?.activeCohorts?.toString() || "0",
+            changePercentage: stats?.trends?.cohorts || "+0"
+        },
+        {
+            icon: <Ban className="text-red-600" />,
+            title: "System Rejections",
+            value: stats?.systemRejects?.toString() || "0",
+            changePercentage: stats?.trends?.rejects || "+0%"
+        },
+    ];
 
     return (
-        <div className="flex flex-col gap-6 min-h-screen p-8 text-white">
-            {/* Connection Status */}
-            <div className="flex items-center gap-2 text-sm">
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="text-slate-400">
-                    {isConnected ? 'Real-time updates active' : 'Connecting...'}
-                </span>
-                {loading && <RefreshCw className="w-4 h-4 animate-spin text-slate-400 ml-2" />}
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6">
+            {/* Real Stats Grid */}
+            <div className="grid gap-6 sm:grid-cols-3">
+                {metrics.map((card, i) => (
+                    <StatisticsCard
+                        key={i}
+                        {...card}
+                        className="bg-white border-zinc-200/60 shadow-sm hover:border-emerald-200 transition-all"
+                    />
+                ))}
             </div>
 
-            {/* Error Banner */}
-            {error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-red-400" />
-                    <p className="text-red-400">{error}</p>
-                    <Button size="sm" variant="ghost" onClick={fetchStats} className="ml-auto text-red-400 hover:text-red-300">
-                        Retry
-                    </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Recruitment Trends Chart */}
+                <div className="lg:col-span-2">
+                    <SalesMetricsCard className="h-full border-zinc-200/60 bg-white shadow-sm rounded-xl" />
                 </div>
-            )}
 
-            {/* Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard 
-                    title="Total Applicants" 
-                    value={stats?.totalApplicants?.toLocaleString() ?? "0"} 
-                    trend={stats?.trends?.applicants ?? "+0%"} 
-                    trendType={stats?.trends?.applicants?.startsWith('+') ? "up" : "down"} 
-                    icon={Users} 
-                    iconColor="text-blue-400" 
-                    bgColor="bg-blue-900/20" 
-                />
-                <StatCard 
-                    title="Active Cohorts" 
-                    value={stats?.activeCohorts?.toString() ?? "0"} 
-                    trend={stats?.trends?.cohorts ?? "+0"} 
-                    trendType="up" 
-                    icon={Package} 
-                    iconColor="text-orange-400" 
-                    bgColor="bg-orange-900/20" 
-                />
-                <StatCard 
-                    title="System Rejects" 
-                    value={stats?.systemRejects?.toString() ?? "0"} 
-                    trend={stats?.trends?.rejects ?? "+0%"} 
-                    trendType="down" 
-                    icon={Ban} 
-                    iconColor="text-rose-400" 
-                    bgColor="bg-rose-900/20" 
-                />
-                <StatCard 
-                    title="Successful Registers" 
-                    value={stats?.successfulRegisters?.toLocaleString() ?? "0"} 
-                    trend={stats?.trends?.registers ?? "+0%"} 
-                    trendType={stats?.trends?.registers?.startsWith('+') ? "up" : "down"} 
-                    icon={Zap} 
-                    iconColor="text-emerald-400" 
-                    bgColor="bg-emerald-900/20" 
-                />
+                {/* Successful Registers Highlights */}
+                <Card className="flex flex-col justify-center items-center bg-gradient-to-br from-emerald-900 to-emerald-950 text-white border-none shadow-xl relative overflow-hidden group rounded-xl p-8">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <CheckCircle size={120} />
+                    </div>
+                    <CheckCircle className="w-14 h-14 text-amber-500 mb-4 drop-shadow-md" />
+                    <h3 className="text-emerald-100/80 text-sm font-bold uppercase tracking-widest mb-1">Total Registered</h3>
+                    <p className="text-7xl font-black tracking-tighter">{stats?.successfulRegisters || 0}</p>
+                    <div className="mt-6 flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full text-emerald-200 text-xs font-semibold backdrop-blur-sm">
+                        <TrendingUp size={14} /> <span>{stats?.trends?.registers || "0%"} vs last month</span>
+                    </div>
+                </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <SystemReport />
-                <SystemRejects />
-            </div>
-            <Application />
+            {/* Recent Applications Table */}
+            <Card className="border-zinc-200/60 shadow-md overflow-hidden bg-white rounded-xl">
+                <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+                    <CardTitle className="text-lg font-bold text-emerald-950 tracking-tight uppercase">
+                        Recent Applications
+                    </CardTitle>
+                    <Link href="/admin/applications" className="flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-600 transition-colors uppercase tracking-widest">
+                        View All <ArrowRight size={14} />
+                    </Link>
+                </div>
+
+                {/* We map the application data to the structure the generic table expects */}
+                <TransactionDatatable
+                    data={applications.slice(0, 8).map(app => ({
+                        id: app.id,
+                        // If Personal Info is missing (draft stage), show placeholder
+                        name: app.personalInfo?.fullName || "Draft Application",
+                        email: app.personalInfo?.email || "No Email",
+                        // Re-purposing 'amount' field for Cohort Name if your table supports it, otherwise 0
+                        amount: 0,
+                        // Status mapping
+                        status: app.status.toLowerCase().replace(/_/g, " "),
+                        // Initials for avatar
+                        avatarFallback: (app.personalInfo?.fullName || "A").charAt(0),
+                        avatar: "",
+                        // Optional: Pass date as a string if the table supports a date column
+                        date: new Date(app.createdAt).toLocaleDateString()
+                    }))}
+                />
+            </Card>
         </div>
-    );
-}
-
-interface StatCardProps {
-    title: string;
-    value: string;
-    trend: string;
-    trendType: "up" | "down";
-    icon: React.ElementType;
-    iconColor: string;
-    bgColor: string;
-}
-
-function StatCard({ title, value, trend, trendType, icon: Icon, iconColor, bgColor }: StatCardProps) {
-    return (
-        <Card className="border-none text-white overflow-hidden">
-            <CardContent className="p-6 relative">
-                <div className={`p-2 rounded-lg w-fit mb-4 ${bgColor} ${iconColor}`}>
-                    <Icon className="h-6 w-6" />
-                </div>
-                <div className="space-y-1">
-                    <p className="text-sm text-slate-400">{title}</p>
-                    <p className="text-3xl font-bold">{value}</p>
-                </div>
-                <div className={`absolute bottom-6 right-6 flex items-center gap-1 text-sm ${trendType === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {trendType === 'up' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                    {trend}
-                </div>
-            </CardContent>
-        </Card>
     );
 }

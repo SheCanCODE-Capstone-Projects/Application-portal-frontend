@@ -1,141 +1,137 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { StepProps, Education } from '../types/form.types';
-import { ChevronRight, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { GraduationCap, Briefcase, Clock, ArrowRight, ArrowLeft, Loader2, BookOpen } from "lucide-react";
+import { z } from "zod";
+import { toast } from "sonner";
+import { EducationDto } from "@/types/application/application";
 
-const EducationStep: React.FC<StepProps> = ({ formData, updateFormData, onNext, onBack }) => {
-  const handleInputChange = (index: number, field: keyof Education, value: string) => {
-    const updatedEducation = formData.education.map((edu, i) =>
-      i === index ? { ...edu, [field]: value } : edu
-    );
-    updateFormData({ education: updatedEducation });
-  };
+const educationSchema = z.object({
+  highestEducationLevel: z.string().min(1, "Please select an education level"),
+  highestEducation: z.string().min(3, "Please specify your qualification"),
+  occupation: z.string().optional(),
+  yearsExperience: z.number().min(0, "Experience cannot be negative"),
+});
 
-  const addEducation = () => {
-    updateFormData({
-      education: [
-        ...formData.education,
-        { name: '', degree: '', grade: '', startDate: '', endDate: '' },
-      ],
-    });
-  };
+export default function EducationStep({ initialData, onNext, onBack, saving }: any) {
+  const [data, setData] = useState<EducationDto>({
+    highestEducationLevel: "BACHELOR",
+    highestEducation: "",
+    occupation: "",
+    employmentStatus: "UNEMPLOYED",
+    yearsExperience: 0
+  });
 
-  const removeEducation = (index: number) => {
-    if (formData.education.length > 1) {
-      updateFormData({
-        education: formData.education.filter((_, i) => i !== index),
-      });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (initialData) {
+      setData((prev) => ({ ...prev, ...initialData }));
     }
-  };
+  }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onNext();
+  const handleSubmit = () => {
+    const result = educationSchema.safeParse(data);
+    if (!result.success) {
+      const fieldErrors: any = result.error.flatten().fieldErrors;
+      setErrors(Object.keys(fieldErrors).reduce((acc: any, key) => {
+        acc[key] = fieldErrors[key][0];
+        return acc;
+      }, {}));
+      toast.error("Please fill in required fields.");
+      return;
+    }
+    onNext(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-      {formData.education.map((edu, index) => (
-        <div key={index} className="p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg relative">
-          {/* Remove Button */}
-          {formData.education.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removeEducation(index)}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 transition p-1"
-              aria-label="Remove education"
+      <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0f5d3f] flex items-center gap-2">
+              <GraduationCap size={18} /> Highest Education Level *
+            </label>
+            <select
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                value={data.highestEducationLevel}
+                onChange={e => setData({...data, highestEducationLevel: e.target.value as any})}
             >
-              <X size={18} className="sm:w-5 sm:h-5" />
-            </button>
-          )}
-          
-          <h3 className="font-semibold text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 pr-8">
-            Education {index + 1}
-          </h3>
-          
-          <div className="space-y-3 sm:space-y-4">
-            {/* Institution */}
+              <option value="PRIMARY">Primary School</option>
+              <option value="SECONDARY">Secondary School</option>
+              <option value="HIGH_SCHOOL">High School</option>
+              <option value="DIPLOMA">Diploma</option>
+              <option value="BACHELOR">Bachelor&#39;s Degree</option>
+              <option value="MASTER">Master&#39;s Degree</option>
+              <option value="PHD">PHD</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0f5d3f] flex items-center gap-2">
+              <BookOpen size={18} /> Education Qualification *
+            </label>
             <input
-              type="text"
-              value={edu.name}
-              onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-              placeholder="Institution name"
-              required
+                className={`w-full p-4 bg-gray-50 border ${errors.highestEducation ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                placeholder="e.g. Bsc in Computer Science"
+                value={data.highestEducation}
+                onChange={e => {
+                  setData({...data, highestEducation: e.target.value});
+                  setErrors({...errors, highestEducation: ""});
+                }}
             />
-            
-            {/* Degree */}
+            {errors.highestEducation && <p className="text-xs text-red-500 font-bold">{errors.highestEducation}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0f5d3f] flex items-center gap-2">
+              <Briefcase size={18} /> Current Occupation
+            </label>
             <input
-              type="text"
-              value={edu.degree}
-              onChange={(e) => handleInputChange(index, 'degree', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-              placeholder="Degree"
-              required
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                placeholder="e.g. Student, Software Developer"
+                value={data.occupation}
+                onChange={e => setData({...data, occupation: e.target.value})}
             />
-            
-            {/* Grade */}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0f5d3f] flex items-center gap-2">
+              <Clock size={18} /> Years of Experience
+            </label>
             <input
-              type="text"
-              value={edu.grade}
-              onChange={(e) => handleInputChange(index, 'grade', e.target.value)}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-              placeholder="Grade/GPA"
-              required
+                type="number"
+                min="0"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                value={data.yearsExperience}
+                onChange={e => setData({...data, yearsExperience: parseInt(e.target.value) || 0})}
             />
-            
-            {/* Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <input
-                type="text"
-                value={edu.startDate}
-                onChange={(e) => handleInputChange(index, 'startDate', e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-                placeholder="Start date"
-                required
-              />
-              <input
-                type="text"
-                value={edu.endDate}
-                onChange={(e) => handleInputChange(index, 'endDate', e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition placeholder:text-gray-400"
-                placeholder="End date"
-                required
-              />
-            </div>
           </div>
         </div>
-      ))}
 
-      {/* Add Button */}
-      <button
-        type="button"
-        onClick={addEducation}
-        className="w-full py-2.5 sm:py-3 text-sm sm:text-base border-2 border-dashed border-emerald-300 text-emerald-700 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition font-medium"
-      >
-        + Add Another Education
-      </button>
-
-      {/* Navigation */}
-      <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 sm:gap-0 pt-4 sm:pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-emerald-700 font-medium hover:bg-emerald-50 rounded-lg transition"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base bg-emerald-700 text-white font-medium rounded-lg hover:bg-emerald-800 transition flex items-center justify-center gap-2"
-        >
-          Next
-          <ChevronRight size={18} className="sm:w-5 sm:h-5" />
-        </button>
+        <div className="flex gap-4 pt-6 border-t border-gray-100">
+          <button
+              type="button"
+              onClick={onBack}
+              className="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-all"
+          >
+            <ArrowLeft size={18} /> Previous Step
+          </button>
+          <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={saving}
+              className="flex-[2] py-4 bg-[#0f5d3f] hover:bg-[#0a4330] text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
+          >
+            {saving ? (
+                <span className="flex items-center gap-2">
+                <Loader2 className="animate-spin" /> Saving...
+              </span>
+            ) : (
+                <>Save & Continue <ArrowRight size={18} /></>
+            )}
+          </button>
+        </div>
       </div>
-    </form>
   );
-};
-
-export default EducationStep;
+}

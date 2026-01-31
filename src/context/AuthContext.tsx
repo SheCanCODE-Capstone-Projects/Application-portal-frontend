@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser({
             id: payload.userId,
             email: payload.sub,
-            role: payload.role, // "APPLICANT" or "ADMIN"
+            role: payload.role,
             name: payload.sub.split("@")[0],
             exp: payload.exp,
             iat: payload.iat,
@@ -98,7 +98,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             applicationStep: payload.applicationStep || "/applicant/apply"
         });
 
-        // Fetch fresh profile from API
         await fetchUserProfile(token);
     }, [fetchUserProfile]);
 
