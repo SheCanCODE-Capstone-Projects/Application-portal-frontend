@@ -2,8 +2,8 @@
 "use client";
 
 import { Menu, Search } from "lucide-react";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useAuth } from "@/context/AuthContext";
+import NotificationDropdown from "@/components/notifications/NotificationDropdown";
 
 interface HeaderProps {
   onMenuClick: () => void;

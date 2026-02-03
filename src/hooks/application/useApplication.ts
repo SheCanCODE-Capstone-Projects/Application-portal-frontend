@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { AxiosError } from "axios";
 import { applicationService } from "@/services/application/application-service";
 import { Application } from "@/types/application/application";
 
@@ -33,7 +34,8 @@ export function useApplication(): UseApplicationReturn {
             const data = await applicationService.getMyApplication(token);
             setApplication(data);
             return data;
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to fetch application";
             setError(message);
             return null;
@@ -55,7 +57,8 @@ export function useApplication(): UseApplicationReturn {
             const data = await applicationService.startApplication(token);
             setApplication(data);
             return data;
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to start application";
             setError(message);
             return null;

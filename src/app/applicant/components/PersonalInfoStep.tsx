@@ -11,7 +11,7 @@ import {
   Loader2,
   ArrowRight
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { toast } from "sonner";
@@ -25,21 +25,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Zod Schema
 const personalInfoSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number is invalid"),
   gender: z.enum(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"], {
-    errorMap: () => ({ message: "Please select a gender" }),
+    message: "Please select a gender",
   }),
   nationality: z.string().min(2, "Nationality is required"),
   maritalStatus: z.enum(["SINGLE", "MARRIED", "DIVORCED", "WIDOWED"], {
-    errorMap: () => ({ message: "Please select a marital status" }),
+    message: "Please select a marital status",
   }),
   socialLinks: z.string().optional(),
   additionalInformation: z.string().optional(),
 });
+
+type PersonalInfoSchemaType = z.infer<typeof personalInfoSchema>;
 
 interface Props {
   initialData?: PersonalInfoDto;
@@ -53,11 +54,30 @@ const COUNTRY_CODES = [
   { code: "+256", label: "🇺🇬 Uganda (+256)" },
   { code: "+255", label: "🇹🇿 Tanzania (+255)" },
   { code: "+257", label: "🇧🇮 Burundi (+257)" },
-  { code: "+1",   label: "🇺🇸 USA (+1)" },
+  { code: "+1", label: "🇺🇸 USA (+1)" },
 ];
 
 export default function PersonalInfoStep({ initialData, onNext, saving }: Props) {
-  const [data, setData] = useState<PersonalInfoDto>({
+
+
+  const getInitialPhone = () => {
+    if (initialData?.phone) {
+      const matchedCode = COUNTRY_CODES.find((c) => initialData.phone.startsWith(c.code));
+      if (matchedCode) {
+        return {
+          code: matchedCode.code,
+          number: initialData.phone.replace(matchedCode.code, ""),
+        };
+      }
+      return { code: "+250", number: initialData.phone };
+    }
+    return { code: "+250", number: "" };
+  };
+
+  const initialPhoneState = getInitialPhone();
+
+
+  const [data, setData] = useState<PersonalInfoDto>(() => ({
     fullName: "",
     email: "",
     phone: "",
@@ -66,28 +86,12 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
     maritalStatus: "SINGLE",
     socialLinks: "",
     additionalInformation: "",
-  });
+    ...initialData,
+  }));
 
-  const [phoneCode, setPhoneCode] = useState("+250");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Initialize Data
-  useEffect(() => {
-    if (initialData) {
-      setData((prev) => ({ ...prev, ...initialData }));
-      if (initialData.phone) {
-        // Try to extract code if it matches known codes, otherwise default to Rwanda logic
-        const matchedCode = COUNTRY_CODES.find(c => initialData.phone.startsWith(c.code));
-        if (matchedCode) {
-          setPhoneCode(matchedCode.code);
-          setPhoneNumber(initialData.phone.replace(matchedCode.code, ""));
-        } else {
-          setPhoneNumber(initialData.phone);
-        }
-      }
-    }
-  }, [initialData]);
+  const [phoneCode, setPhoneCode] = useState(initialPhoneState.code);
+  const [phoneNumber, setPhoneNumber] = useState(initialPhoneState.number);
+  const [errors, setErrors] = useState<Partial<Record<keyof PersonalInfoSchemaType, string>>>({});
 
   const handleSubmit = () => {
     // 1. Construct Phone
@@ -98,18 +102,24 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
     const result = personalInfoSchema.safeParse(payload);
 
     if (!result.success) {
-      const fieldErrors: any = result.error.flatten().fieldErrors;
-      setErrors(Object.keys(fieldErrors).reduce((acc: any, key) => {
-        acc[key] = fieldErrors[key][0];
-        return acc;
-      }, {}));
+      const fieldErrors = result.error.flatten().fieldErrors;
+
+      const newErrors: Record<string, string> = {};
+      (Object.keys(fieldErrors) as Array<keyof typeof fieldErrors>).forEach((key) => {
+        const messages = fieldErrors[key];
+        if (messages && messages.length > 0) {
+          newErrors[key] = messages[0];
+        }
+      });
+
+      setErrors(newErrors);
       toast.error("Please fix the errors in the form.");
       return;
     }
 
     // 3. Libphonenumber Validation
     if (!isValidPhoneNumber(fullPhone)) {
-      setErrors(prev => ({...prev, phone: "Invalid phone number format"}));
+      setErrors((prev) => ({ ...prev, phone: "Invalid phone number format" }));
       toast.error("Please enter a valid phone number.");
       return;
     }
@@ -121,14 +131,15 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
   return (
       <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
           {/* Full Name */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <User size={14} /> Full Name *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                className={`w-full p-4 bg-gray-50 border ${
+                    errors.fullName ? "border-red-500 bg-red-50" : "border-gray-200"
+                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
                 placeholder="e.g. Keza Teta"
                 value={data.fullName}
                 onChange={(e) => {
@@ -136,7 +147,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                   setErrors({ ...errors, fullName: "" });
                 }}
             />
-            {errors.fullName && <p className="text-xs text-red-500 font-medium">{errors.fullName}</p>}
+            {errors.fullName && (
+                <p className="text-xs text-red-500 font-medium">{errors.fullName}</p>
+            )}
           </div>
 
           {/* Email */}
@@ -145,7 +158,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
               <Mail size={14} /> Email Address *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                className={`w-full p-4 bg-gray-50 border ${
+                    errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
+                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
                 placeholder="name@example.com"
                 value={data.email}
                 onChange={(e) => {
@@ -153,7 +168,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                   setErrors({ ...errors, email: "" });
                 }}
             />
-            {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
+            {errors.email && (
+                <p className="text-xs text-red-500 font-medium">{errors.email}</p>
+            )}
           </div>
 
           {/* Phone */}
@@ -169,13 +186,17 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200 z-[9999]">
                     {COUNTRY_CODES.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.label}
+                        </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <input
-                  className={`flex-1 p-4 bg-gray-50 border ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                  className={`flex-1 p-4 bg-gray-50 border ${
+                      errors.phone ? "border-red-500 bg-red-50" : "border-gray-200"
+                  } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
                   placeholder="788 123 456"
                   value={phoneNumber}
                   type="tel"
@@ -185,7 +206,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                   }}
               />
             </div>
-            {errors.phone && <p className="text-xs text-red-500 font-medium">{errors.phone}</p>}
+            {errors.phone && (
+                <p className="text-xs text-red-500 font-medium">{errors.phone}</p>
+            )}
           </div>
 
           {/* Nationality */}
@@ -194,7 +217,11 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
               <Globe size={14} /> Nationality *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${errors.nationality ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                className={`w-full p-4 bg-gray-50 border ${
+                    errors.nationality
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200"
+                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
                 placeholder="Rwandan"
                 value={data.nationality}
                 onChange={(e) => setData({ ...data, nationality: e.target.value })}
@@ -206,7 +233,11 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <User size={14} /> Gender *
             </label>
-            <Select value={data.gender} onValueChange={(val: any) => setData({ ...data, gender: val })}>
+            <Select
+                value={data.gender}
+                // Explicitly cast the value from the string returned by Select to the union type
+                onValueChange={(val) => setData({ ...data, gender: val as PersonalInfoDto["gender"] })}
+            >
               <SelectTrigger className="w-full h-[58px] bg-gray-50 border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500">
                 <SelectValue placeholder="Select Gender" />
               </SelectTrigger>
@@ -217,7 +248,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                 <SelectItem value="PREFER_NOT_TO_SAY">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
-            {errors.gender && <p className="text-xs text-red-500 font-medium">{errors.gender}</p>}
+            {errors.gender && (
+                <p className="text-xs text-red-500 font-medium">{errors.gender}</p>
+            )}
           </div>
 
           {/* Marital Status - Overlay Select */}
@@ -225,7 +258,13 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <Heart size={14} /> Marital Status *
             </label>
-            <Select value={data.maritalStatus} onValueChange={(val: any) => setData({ ...data, maritalStatus: val })}>
+            <Select
+                value={data.maritalStatus}
+                // Explicitly cast the value from the string returned by Select to the union type
+                onValueChange={(val) =>
+                    setData({ ...data, maritalStatus: val as PersonalInfoDto["maritalStatus"] })
+                }
+            >
               <SelectTrigger className="w-full h-[58px] bg-gray-50 border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500">
                 <SelectValue placeholder="Select Status" />
               </SelectTrigger>
@@ -261,7 +300,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                 className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all resize-none"
                 placeholder="Any other details we should know about..."
                 value={data.additionalInformation || ""}
-                onChange={(e) => setData({ ...data, additionalInformation: e.target.value })}
+                onChange={(e) =>
+                    setData({ ...data, additionalInformation: e.target.value })
+                }
             />
           </div>
         </div>
@@ -277,7 +318,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                   <Loader2 className="animate-spin w-5 h-5" /> Saving...
                 </>
             ) : (
-                <>Save & Continue <ArrowRight size={18} /></>
+                <>
+                  Save & Continue <ArrowRight size={18} />
+                </>
             )}
           </button>
         </div>

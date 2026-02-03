@@ -1,89 +1,84 @@
-// src/components/admin/Header.tsx
-'use client';
+"use client";
 
-import { Dispatch, SetStateAction, useState } from 'react';
-import { Bars3Icon, BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import React, { useEffect, useState } from "react";
+import { Menu, Bell, Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { notificationService } from "@/services/notification/notification-service";
+import Link from "next/link";
 
-export default function Header({
-  setSidebarOpen,
-}: {
-  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+interface HeaderProps {
+  setSidebarOpen: (open: boolean) => void;
+}
+
+export default function Header({ setSidebarOpen }: HeaderProps) {
+  const { user, userProfile } = useAuth(); // Get userProfile from context
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Display Name Logic: Profile Username > Auth User Name > Email prefix
+  const displayName = userProfile?.username || user?.name || user?.email?.split('@')[0] || "Admin";
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      const token = localStorage.getItem("access_token");
+      if(token) {
+        try {
+          const notifs = await notificationService.getUnread(token);
+          setUnreadCount(notifs.length);
+        } catch(e) { console.error("Notif error", e); }
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-sm">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-        {/* Left: Mobile menu button + title */}
-        <div className="flex items-center">
+      <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 shadow-sm z-10">
+        <div className="flex items-center gap-4">
           <button
-            type="button"
-            className="lg:hidden mr-3 text-gray-500 hover:text-orange-600"
-            onClick={() => setSidebarOpen(true)}
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 text-gray-500 lg:hidden hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" />
+            <Menu size={24} />
           </button>
-          <h1 className="text-lg font-semibold text-gray-800 hidden sm:block">Admin Dashboard</h1>
-        </div>
 
-        {/* Right: Notifications + Profile */}
-        <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <div className="relative">
-            <button
-              type="button"
-              className="relative rounded-full p-1 text-gray-600 hover:text-orange-600 focus:outline-none"
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-            >
-              <BellIcon className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-orange-500"></span>
-            </button>
-
-            {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                <div className="p-2">
-                  <div className="block px-4 py-2 text-sm text-gray-700">No new notifications</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Profile */}
-          <div className="relative">
-            <button
-              type="button"
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-orange-600 focus:outline-none"
-              onClick={() => setProfileOpen(!profileOpen)}
-            >
-              <UserCircleIcon className="h-8 w-8 text-gray-500" />
-              <span className="hidden md:block">Admin User</span>
-              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
-            </button>
-
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                <div className="py-1">
-                  <a
-                    href="/admin/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Your Profile
-                  </a>
-                  <a
-                    href="/api/auth/logout"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Sign out
-                  </a>
-                </div>
-              </div>
-            )}
+          <div className="hidden md:flex items-center relative">
+            <Search className="absolute left-3 text-gray-400" size={16} />
+            <input
+                type="text"
+                placeholder="Global Search..."
+                className="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-full text-sm focus:ring-2 focus:ring-emerald-500 w-64 transition-all"
+            />
           </div>
         </div>
-      </div>
-    </header>
+
+        <div className="flex items-center gap-6">
+          <Link href="/admin/dashboard/notifications">
+            <button className="relative p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 border border-white"></span>
+                  </span>
+              )}
+            </button>
+          </Link>
+
+          <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-gray-800">{displayName}</p>
+              <p className="text-xs text-emerald-600 font-medium">{user?.role || "Administrator"}</p>
+            </div>
+            <Avatar className="w-10 h-10 border-2 border-white shadow-sm cursor-pointer hover:scale-105 transition-transform">
+              <AvatarImage src={`https://ui-avatars.com/api/?name=${displayName}&background=0f5d3f&color=fff`} />
+              <AvatarFallback className="bg-emerald-700 text-white">
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      </header>
   );
 }

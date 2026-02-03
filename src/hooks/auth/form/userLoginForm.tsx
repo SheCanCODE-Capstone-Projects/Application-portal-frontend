@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AxiosError } from "axios";
 import { LoginFormData, LoginErrors } from "@/types/auth/LoginFormData";
 import { useUserLogin } from "@/hooks/auth/userLogin";
 import { toast } from "sonner";
@@ -77,8 +78,9 @@ export const useLoginForm = () => {
             } else {
                 toast.error(result.message || "Login failed");
             }
-        } catch (error: any) {
-            const message = error.response?.data?.message || error.message || "Login failed";
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
+            const message = err.response?.data?.message || err.message || "Login failed";
             toast.error(message);
         } finally {
             setIsLoading(false);

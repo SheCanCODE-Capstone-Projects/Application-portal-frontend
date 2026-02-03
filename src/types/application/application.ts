@@ -79,13 +79,11 @@ export interface VulnerabilityDto {
     description?: string;
 }
 
-export interface DisabilityDto {
-    hasDisability: boolean;
-    disabilityType?: string;
-    disabilityDescription?: string;
-}
 
-export interface DocumentDto {
-    docType: string;
-    fileUrl: string; // Backend expects a URL string
+export interface ApplicationQueryParams {
+    page?: number;
+    limit?: number;
+    status?: ApplicationStatus;
+    search?: string;
+    cohortId?: string;
 }
