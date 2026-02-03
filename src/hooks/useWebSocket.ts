@@ -1,29 +1,52 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 interface WebSocketMessage {
     type: string;
-    payload?: any;
+    payload?: unknown;
 }
 
 interface UseWebSocketOptions {
-    onMessage: (message: WebSocketMessage) => void;
+    onMessage?: (message: WebSocketMessage) => void;
 }
 
-export function useWebSocket({ onMessage }: UseWebSocketOptions) {
+interface UseWebSocketReturn {
+    clientRef: React.RefObject<Client | null>;
+    isConnected: boolean;
+    subscribe: (destination: string, callback: (message: any) => void) => () => void;
+}
+
+export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSocketReturn {
     const clientRef = useRef<Client | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+
+    const subscribe = useCallback((destination: string, callback: (message: any) => void) => {
+        if (!clientRef.current || !clientRef.current.connected) {
+            return () => { };
+        }
+
+        const subscription = clientRef.current.subscribe(destination, (message) => {
+            try {
+                const body = JSON.parse(message.body);
+                callback(body);
+            } catch (e) {
+                console.error("Failed to parse message", e);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [isConnected]); // Re-create when connection status changes
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        // Use SockJS client matching backend configuration
         const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/ws`);
 
-        const client = new Client({
+        const stompClient = new Client({
             webSocketFactory: () => socket,
             connectHeaders: {
                 Authorization: `Bearer ${token}`,
@@ -36,23 +59,31 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions) {
             heartbeatOutgoing: 4000,
         });
 
-        client.onConnect = () => {
+        stompClient.onConnect = () => {
             console.log("Connected to WebSocket");
-
-            // Subscribe to user-specific notifications
-            // Backend typically sends to /user/queue/notifications based on your config
-            client.subscribe("/user/queue/notifications", (message) => {
-                try {
-                    const body = JSON.parse(message.body);
-                    onMessage({ type: "NOTIFICATION", payload: body });
-                } catch (e) {
-                    console.error("Failed to parse message", e);
-                }
-            });
+            setIsConnected(true);
+            if (onMessage) {
+                stompClient.subscribe("/user/queue/notifications", (message) => {
+                    try {
+                        const body = JSON.parse(message.body);
+                        onMessage({ type: "NOTIFICATION", payload: body });
+                    } catch (e) {
+                        console.error("Failed to parse message", e);
+                    }
+                });
+            }
         };
 
-        client.activate();
-        clientRef.current = client;
+        stompClient.onStompError = (frame) => {
+            console.error("STOMP error", frame);
+        };
+
+        stompClient.onDisconnect = () => {
+            setIsConnected(false);
+        };
+
+        stompClient.activate();
+        clientRef.current = stompClient;
 
         return () => {
             if (clientRef.current) {
@@ -61,5 +92,5 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions) {
         };
     }, [onMessage]);
 
-    return clientRef.current;
+    return { clientRef, isConnected, subscribe };
 }

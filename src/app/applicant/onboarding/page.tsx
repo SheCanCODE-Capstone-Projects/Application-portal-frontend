@@ -1,197 +1,202 @@
-"use client";
+ "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useCohortApplication } from "@/hooks/me/useCohortApplication";
-import { Cohort } from "@/types/cohort/cohort";
-import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, X } from "lucide-react";
-import { AuroraBackground } from "@/components/background/page";
-import { Navbar } from "@/components/share/Navbar";
+    import React, { useState } from "react";
+    import { useRouter } from "next/navigation";
+    import { useAuth } from "@/context/AuthContext";
+    import { useCohortApplication } from "@/hooks/me/useCohortApplication";
+    import { Cohort } from "@/types/cohort/cohort";
+    import Image from "next/image";
+    import { AnimatePresence, motion } from "framer-motion";
+    import { ArrowRight, X, Loader2 } from "lucide-react";
+    import { AuroraBackground } from "@/components/background/page";
+    import { Navbar } from "@/components/share/Navbar";
 
 // Array of local frontend images for random assignment
-const cohortImages = [
-    "/images/13211.jpg",
-    "/images/2517915.jpg",
-    "/images/4882464.jpg",
-    "/images/7040859.jpg",
-    "/images/backend_text_1.jpg",
-];
+    const cohortImages = [
+        "/images/13211.jpg",
+        "/images/2517915.jpg",
+        "/images/4882464.jpg",
+        "/images/7040859.jpg",
+        "/images/backend_text_1.jpg",
+    ];
 
-export default function OnboardingPage() {
-    const router = useRouter();
-    const { user, isAuthenticated, hasCohort, checkAuth, refreshProfile } =
-        useAuth();
-    const { cohorts, loading, applying, fetchCohorts, applyToCohort } =
-        useCohortApplication();
+    export default function OnboardingPage() {
+        const router = useRouter();
+        const { user, isAuthenticated, hasCohort, checkAuth, refreshProfile } =
+            useAuth();
+        const { cohorts, loading, applying, fetchCohorts, applyToCohort } =
+            useCohortApplication();
 
-    const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null);
-    const [initialized, setInitialized] = useState(false);
+        const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null);
+        const [initialized, setInitialized] = useState(false);
+        const [cohortImagesMap] = useState<Record<string, string>>({});
 
-    // Assign a random image to each cohort
-    const getRandomImage = () =>
-        cohortImages[Math.floor(Math.random() * cohortImages.length)];
+        const getCohortImage = (id: string) => {
+            if (!cohortImagesMap[id]) {
+                cohortImagesMap[id] = cohortImages[Math.floor(Math.random() * cohortImages.length)];
+            }
+            return cohortImagesMap[id];
+        };
 
-    const cohortImagesMap: Record<string, string> = {};
-    cohorts.forEach((c) => {
-        if (!cohortImagesMap[c.id]) cohortImagesMap[c.id] = getRandomImage();
-    });
+        React.useEffect(() => {
+            checkAuth().then(() => setInitialized(true));
+        }, [checkAuth]);
 
-    /* -------------------- AUTH -------------------- */
-    React.useEffect(() => {
-        checkAuth().then(() => setInitialized(true));
-    }, [checkAuth]);
+        React.useEffect(() => {
+            if (initialized && !isAuthenticated)
+                router.replace("/login?redirect=/applicant/onboarding");
+        }, [initialized, isAuthenticated, router]);
 
-    React.useEffect(() => {
-        if (initialized && !isAuthenticated)
-            router.push("/login?redirect=/applicant/onboarding");
-    }, [initialized, isAuthenticated, router]);
+        React.useEffect(() => {
+            if (initialized && user?.role === "ADMIN") router.replace("/admin");
+        }, [initialized, user, router]);
 
-    React.useEffect(() => {
-        if (initialized && user?.role === "ADMIN") router.push("/admin");
-    }, [initialized, user, router]);
 
-    React.useEffect(() => {
-        if (initialized && hasCohort) router.push("/applicant/apply");
-    }, [initialized, hasCohort, router]);
+        React.useEffect(() => {
+            if (initialized && hasCohort) router.replace("/applicant");
+        }, [initialized, hasCohort, router]);
 
-    React.useEffect(() => {
-        if (initialized && isAuthenticated && !hasCohort) fetchCohorts();
-    }, [initialized, isAuthenticated, hasCohort, fetchCohorts]);
+        React.useEffect(() => {
+            if (initialized && isAuthenticated && !hasCohort) fetchCohorts();
+        }, [initialized, isAuthenticated, hasCohort, fetchCohorts]);
 
-    /* -------------------- APPLY -------------------- */
-    const handleApply = async () => {
-        if (!selectedCohort) return;
-        const result = await applyToCohort(selectedCohort.id);
-        if (result) {
-            await refreshProfile();
-            router.push("/applicant/apply");
-        }
-    };
 
-    /* -------------------- LOADING -------------------- */
-    if (!initialized || (loading && cohorts.length === 0))
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin w-10 h-10 rounded-full border-4 border-green-500 border-t-transparent" />
-            </div>
-        );
+        const handleApply = async () => {
+            if (!selectedCohort || applying) return;
 
-    return (
-        <AuroraBackground className="px-4">
-            <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center"
-            >
-                {/* Navbar */}
-                <Navbar className="w-full max-w-6xl" />
+            // Apply to cohort
+            const success = await applyToCohort(selectedCohort.id);
 
-                {/* Header */}
-                <section className="text-center mt-5 mb-6 max-w-3xl">
-                    <p className="text-2xl font-bold text-green-700 mb-2">
-                        Onboarding To a Cohort
-                    </p>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-                        What kind of cohort would you like to join?
-                    </h1>
-                    <p className="text-slate-800 text-center max-w-xl mb-10">
-                        Choose the program that best fits your goals and start learning with
-                        a focused cohort.
-                    </p>
-                </section>
+            if (success) {
+                await refreshProfile();
+                router.push("/applicant");
+            }
+        };
 
-                {/* Cohort Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                    {cohorts.map((cohort, index) => {
-                        const isActive = selectedCohort?.id === cohort.id;
-                        const imgSrc = cohortImagesMap[cohort.id];
 
-                        return (
-                            <motion.button
-                                key={cohort.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                onClick={() => setSelectedCohort(cohort)}
-                                className={`group relative h-72 w-full rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer hover:shadow-lg ${
-                                    isActive ? "border-green-500" : "border-slate-200"
-                                }`}
-                            >
-                                {/* Image */}
-                                <Image
-                                    src={imgSrc}
-                                    alt={cohort.name}
-                                    fill
-                                    className="absolute inset-0 object-cover"
-                                />
-
-                                {/* Overlay */}
-                                <div className="absolute inset-0 bg-black/65 group-hover:bg-black/40 transition-all" />
-
-                                {/* Info */}
-                                <div className="absolute inset-x-0 bottom-0 p-3">
-                                    <h3 className="text-white text-lg font-bold text-center text-shadow-lg">
-                                        {cohort.name}
-                                    </h3>
-
-                                </div>
-                            </motion.button>
-                        );
-                    })}
+        if (!initialized || (loading && cohorts.length === 0))
+            return (
+                <div className="min-h-screen flex items-center justify-center">
+                    <Loader2 className="animate-spin w-10 h-10 text-green-600" />
                 </div>
+            );
 
-                {/* Cohort Preview Modal */}
-                <AnimatePresence>
-                    {selectedCohort && (
-                        <motion.div
-                            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                        >
+        return (
+            <AuroraBackground className="px-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="relative z-10 max-w-6xl w-full mx-auto flex flex-col items-center pb-20"
+                >
+                    <Navbar className="w-full max-w-6xl" />
+
+                    <section className="text-center mt-8 mb-10 max-w-3xl px-4">
+                        <p className="text-2xl font-bold text-green-700 mb-2">
+                            Program Selection
+                        </p>
+                        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
+                            Choose Your Path
+                        </h1>
+                        <p className="text-slate-800 text-center max-w-xl mb-10 mx-auto text-lg">
+                            Select the cohort that aligns with your career goals to begin your application.
+                        </p>
+                    </section>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                        {cohorts.map((cohort, index) => {
+                            const isActive = selectedCohort?.id === cohort.id;
+                            const imgSrc = getCohortImage(cohort.id);
+
+                            return (
+                                <motion.div
+                                    key={cohort.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    onClick={() => setSelectedCohort(cohort)}
+                                    className={`group relative h-80 w-full rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl ${
+                                        isActive ? "border-green-500 ring-2 ring-green-500" : "border-slate-200"
+                                    }`}
+                                >
+                                    <Image
+                                        src={imgSrc}
+                                        alt={cohort.name}
+                                        fill
+                                        className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-all" />
+                                    <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                                        <h3 className="text-xl font-bold text-center drop-shadow-md mb-1">
+                                            {cohort.name}
+                                        </h3>
+                                        <p className="text-xs text-center text-gray-200 opacity-80">Click to select</p>
+                                    </div>
+                                    {isActive && (
+                                        <div className="absolute top-4 right-4 bg-green-500 text-white p-2 rounded-full">
+                                            <ArrowRight size={20} />
+                                        </div>
+                                    )}
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+
+                    <AnimatePresence>
+                        {selectedCohort && (
                             <motion.div
-                                className="relative w-full max-w-3xl bg-white dark:bg-zinc-900 rounded-xl p-6 overflow-y-auto max-h-[80vh]"
-                                initial={{ scale: 0.95, y: 20 }}
-                                animate={{ scale: 1, y: 0 }}
-                                exit={{ scale: 0.95, y: 20 }}
-                                transition={{
-                                    duration: 0.2,
-                                    type: "spring",
-                                    stiffness: 600,
-                                    damping: 32,
-                                }}
+                                className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => !applying && setSelectedCohort(null)}
                             >
-                                {/* Close */}
-                                <button
-                                    className="absolute top-6 right-5 text-gray-700 hover:text-gray-900 rounded-full border border-gray-300 shadow"
-                                    onClick={() => setSelectedCohort(null)}
+                                <motion.div
+                                    className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 overflow-y-auto max-h-[85vh] shadow-2xl"
+                                    initial={{ scale: 0.95, y: 20 }}
+                                    animate={{ scale: 1, y: 0 }}
+                                    exit={{ scale: 0.95, y: 20 }}
+                                    onClick={(e) => e.stopPropagation()}
                                 >
-                                    <X size={20} />
-                                </button>
+                                    <button
+                                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                        onClick={() => setSelectedCohort(null)}
+                                        disabled={applying}
+                                    >
+                                        <X size={24} />
+                                    </button>
 
-                                {/* Cohort Info */}
-                                <h2 className="text-2xl font-bold mb-3">{selectedCohort.name}</h2>
-                                <p className="text-gray-700 mb-6">
-                                    {selectedCohort.description || "No description provided."}
-                                </p>
+                                    <h2 className="text-3xl font-bold mb-4 text-gray-900">{selectedCohort.name}</h2>
+                                    <div className="prose max-w-none text-gray-600 mb-8">
+                                        <p>{selectedCohort.description || "No description provided for this cohort."}</p>
+                                    </div>
 
-                                {/* Apply Button */}
-                                <button
-                                    onClick={handleApply}
-                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-full w-full"
-                                >
-                                    Continue to Application{" "}
-                                    <ArrowRight className="inline w-4 h-4 ml-2" />
-                                </button>
+                                    <button
+                                        onClick={handleApply}
+                                        disabled={applying}
+                                        className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] ${
+                                            applying
+                                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                                : "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-200"
+                                        }`}
+                                    >
+                                        {applying ? (
+                                            <>
+                                                <Loader2 className="animate-spin h-5 w-5" />
+                                                Joining Cohort...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Continue to Application
+                                                <ArrowRight className="h-5 w-5" />
+                                            </>
+                                        )}
+                                    </button>
+                                </motion.div>
                             </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </motion.div>
-        </AuroraBackground>
-    );
-}
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+            </AuroraBackground>
+        );
+    }

@@ -1,27 +1,34 @@
-// src/app/admin/AdminGuard.tsx
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
     const router = useRouter();
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/login");
-            return;
+        if (!loading) {
+            if (!isAuthenticated) {
+                router.replace("/login");
+            } else if (user?.role !== "ADMIN") {
+                router.replace(user?.role === "APPLICANT" ? "/applicant/dashboard" : "/");
+            } else {
+                setTimeout(() => setIsAuthorized(true), 0)
+            }
         }
+    }, [isAuthenticated, user, loading, router]);
 
-        if (user?.role !== "ADMIN") {
-            router.push(user?.role === "APPLICANT" ? "/applicant/dashboard" : "/");
-            return;
-        }
-    }, [isAuthenticated, user, router]);
-
-    if (!isAuthenticated || user?.role !== "ADMIN") return null;
+    if (loading || !isAuthorized) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center bg-gray-50">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+            </div>
+        );
+    }
 
     return <>{children}</>;
 }

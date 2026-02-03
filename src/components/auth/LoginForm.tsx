@@ -14,7 +14,6 @@ export default function LoginForm() {
     formData,
     errors,
     isLoading,
-    loginSuccess,
     handleChange,
     handleSubmit,
   } = useLoginForm();
@@ -22,38 +21,38 @@ export default function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
-  if (loginSuccess) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-[#d7cfc8] z-50">
-          <div className="mb-6">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <svg
-                className="h-6 w-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="mt-4 text-2xl font-bold text-[#0f5d3f]">
-              Login Successful!
-            </h2>
-            <p className="mt-2 text-gray-600">
-              Welcome back. You are being redirected to the dashboard.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (loginSuccess) {
+  //   return (
+  //     <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
+  //       <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-[#d7cfc8] z-50">
+  //         <div className="mb-6">
+  //           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+  //             <svg
+  //               className="h-6 w-6 text-green-600"
+  //               fill="none"
+  //               stroke="currentColor"
+  //               viewBox="0 0 24 24"
+  //               xmlns="http://www.w3.org/2000/svg"
+  //             >
+  //               <path
+  //                 strokeLinecap="round"
+  //                 strokeLinejoin="round"
+  //                 strokeWidth="2"
+  //                 d="M5 13l4 4L19 7"
+  //               ></path>
+  //             </svg>
+  //           </div>
+  //           <h2 className="mt-4 text-2xl font-bold text-[#0f5d3f]">
+  //             Login Successful!
+  //           </h2>
+  //           <p className="mt-2 text-gray-600">
+  //             Welcome back. You are being redirected to the dashboard.
+  //           </p>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
@@ -156,7 +155,7 @@ export default function LoginForm() {
           Don’t have an account?{" "}
           <button
             type="button"
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/register")}
             className="font-semibold text-[#d97700]"
           >
             Sign Up
