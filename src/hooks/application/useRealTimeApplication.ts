@@ -16,7 +16,7 @@ export function useRealTimeApplication(userId: string | undefined) {
             try {
                 const data = await applicationService.getMyApplication(token);
                 setApplication(data);
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error("Dashboard fetch error", err);
             }
         }
@@ -32,7 +32,7 @@ export function useRealTimeApplication(userId: string | undefined) {
 
         // Subscribing to real-time progress updates sent by backend:
         // com.igirerwanda.application_portal_backend.notification.service.WebSocketService.broadcastApplicationProgress
-        const unsubProgress = subscribe(`/topic/progress/${userId}`, (update: any) => {
+        const unsubProgress = subscribe(`/topic/progress/${userId}`, (update: { progress: number }) => {
             setApplication(prev => prev ? { ...prev, progress: update.progress } : null);
         });
 

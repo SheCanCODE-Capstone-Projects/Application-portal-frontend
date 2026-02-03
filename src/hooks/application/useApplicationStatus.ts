@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { AxiosError } from "axios";
 import { applicationService } from "@/services/application/application-service";
 import { Application, ApplicationStatus } from "@/types/application/application";
 
@@ -43,7 +44,7 @@ export function useApplicationStatus(): ApplicationStatusResult {
         setError(null);
         try {
             const app = await applicationService.getMyApplication(token);
-            
+
             if (app) {
                 setHasApplied(true);
                 setApplication(app);
@@ -55,7 +56,8 @@ export function useApplicationStatus(): ApplicationStatusResult {
                 setIsFirstTime(true);
                 setCurrentStep(1);
             }
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             if (err.response?.status === 404) {
                 setHasApplied(false);
                 setIsFirstTime(true);

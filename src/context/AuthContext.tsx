@@ -1,9 +1,8 @@
-// src/context/AuthContext.tsx
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { AuthView, User } from "@/types/auth/AuthView";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter} from "next/navigation";
 import { userService, UserProfile } from "@/services/user/user-service";
 
 type AuthContextType = {
@@ -17,7 +16,22 @@ type AuthContextType = {
     checkAuth: () => Promise<void>;
     refreshProfile: () => Promise<UserProfile | null>;
     hasCohort: boolean;
+    loading: boolean;
 };
+
+type ApplicationStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "DRAFT" | "SUBMITTED";
+
+type DecodedToken = {
+    userId: string;
+    sub: string;
+    role: "ADMIN" | "APPLICANT" | string;
+    exp: number;
+    iat: number;
+    cohortId?: string;
+    cohortName?: string;
+    applicationStatus?: string;
+    applicationStep?: string;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,10 +40,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [view, setView] = useState<AuthView>("login");
     const router = useRouter();
-    const pathname = usePathname();
     const isAuthenticated = !!user;
+    const [loading, setLoading] = useState(true);
 
-    const decodeToken = (token: string): any => {
+    const decodeToken = (token: string): DecodedToken | null => {
         try {
             const base64Url = token.split(".")[1];
             const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -39,18 +53,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
                     .join("")
             );
-            return JSON.parse(jsonPayload);
+
+            const payload = JSON.parse(jsonPayload);
+
+            if (!payload.userId || !payload.sub || !payload.role || !payload.exp || !payload.iat) {
+                throw new Error("Token payload missing required fields");
+            }
+
+            return payload
         } catch (err) {
+            console.error("Failed to decode token:", err);
             return null;
         }
     };
 
     const isTokenExpired = (exp: number): boolean => {
-        // Buffer of 10 seconds to prevent edge-case failures
         return Date.now() >= (exp * 1000) - 10000;
     };
 
-    // Fetch user profile from API
     const fetchUserProfile = useCallback(async (token: string): Promise<UserProfile | null> => {
         try {
             const profile = await userService.me(token);
@@ -69,8 +89,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [fetchUserProfile]);
 
     const checkAuth = useCallback(async () => {
+        setLoading(true);
         const token = localStorage.getItem("access_token");
-
         if (!token) {
             setUser(null);
             setUserProfile(null);
@@ -78,14 +98,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         const payload = decodeToken(token);
-
         if (!payload || (payload.exp && isTokenExpired(payload.exp))) {
-            console.warn("Token expired or invalid session.");
             logout();
             return;
         }
 
-        // Hydrate User State from JWT Payload
+        const allowedStatuses: ApplicationStatus[] = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DRAFT", "SUBMITTED"];
+        const appStatus: ApplicationStatus = allowedStatuses.includes(payload.applicationStatus as ApplicationStatus)
+            ? (payload.applicationStatus as ApplicationStatus)
+            : "NOT_STARTED";
+
         setUser({
             id: payload.userId,
             email: payload.sub,
@@ -93,12 +115,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             name: payload.sub.split("@")[0],
             exp: payload.exp,
             iat: payload.iat,
-            cohort: payload.cohort || null,
-            applicationStatus: payload.applicationStatus || "NOT_STARTED",
+            cohort: payload.cohortId || null,
+            applicationStatus: appStatus,
             applicationStep: payload.applicationStep || "/applicant/apply"
         });
 
         await fetchUserProfile(token);
+        setLoading(false);
     }, [fetchUserProfile]);
 
     const logout = useCallback(() => {
@@ -110,9 +133,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const loginWithToken = useCallback(async (token: string) => {
         localStorage.setItem("access_token", token);
-        
-        // Decode token first
+
         const payload = decodeToken(token);
+        if(!payload) return;
+
+        const allowedStatuses: ApplicationStatus[] = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DRAFT", "SUBMITTED"];
+        const appStatus: ApplicationStatus = allowedStatuses.includes(payload.applicationStatus as ApplicationStatus)
+            ? (payload.applicationStatus as ApplicationStatus)
+            : "NOT_STARTED";
+
         if (payload) {
             setUser({
                 id: payload.userId,
@@ -121,31 +150,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 name: payload.sub.split("@")[0],
                 exp: payload.exp,
                 iat: payload.iat,
-                cohort: payload.cohort || null,
-                applicationStatus: payload.applicationStatus || "NOT_STARTED",
+                cohort: payload.cohortId || null,
+                applicationStatus: appStatus,
                 applicationStep: payload.applicationStep || "/applicant/apply"
             });
         }
-
-        // Fetch profile from API
-        const profile = await fetchUserProfile(token);
-
-        // Navigate based on role and cohort status
+        await fetchUserProfile(token);
         if (payload?.role === "ADMIN") {
             router.push("/admin");
         } else if (payload?.role === "APPLICANT") {
-            // Check if user has a cohort
-            if (profile && profile.cohortId && profile.cohortName) {
-                // User has cohort - go to application flow
-                router.push("/applicant/apply");
-            } else {
-                // No cohort - go to onboarding
-                router.push("/applicant/onboarding");
-            }
+            router.push("/applicant");
         }
     }, [fetchUserProfile, router]);
 
-    // Check auth on mount
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
@@ -153,17 +170,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const hasCohort = !!(userProfile?.cohortId && userProfile?.cohortName);
 
     return (
-        <AuthContext.Provider value={{ 
-            user, 
+        <AuthContext.Provider value={{
+            user,
             userProfile,
-            view, 
-            setView, 
-            isAuthenticated, 
-            loginWithToken, 
-            logout, 
+            view,
+            setView,
+            isAuthenticated,
+            loginWithToken,
+            logout,
             checkAuth,
             refreshProfile,
-            hasCohort 
+            hasCohort,
+            loading
         }}>
             {children}
         </AuthContext.Provider>

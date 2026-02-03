@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { AxiosError } from "axios";
 import { cohortService } from "@/services/cohort/cohort-service";
 import { Cohort } from "@/types/cohort/cohort";
 
@@ -36,7 +37,8 @@ export function useCohorts(): UseCohortsReturn {
         try {
             const data = await cohortService.getAllAdminCohorts(token);
             setCohorts(Array.isArray(data) ? data : []);
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to fetch cohorts";
             setError(message);
             setCohorts([]);
@@ -58,7 +60,8 @@ export function useCohorts(): UseCohortsReturn {
             const newCohort = await cohortService.createCohort(data, token);
             setCohorts(prev => [newCohort, ...prev]);
             return true;
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to create cohort";
             setError(message);
             return false;
@@ -80,7 +83,8 @@ export function useCohorts(): UseCohortsReturn {
             const updated = await cohortService.updateCohort(id, data, token);
             setCohorts(prev => prev.map(c => c.id === id ? updated : c));
             return true;
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to update cohort";
             setError(message);
             return false;
@@ -102,7 +106,8 @@ export function useCohorts(): UseCohortsReturn {
             await cohortService.deleteCohort(id, token);
             setCohorts(prev => prev.filter(c => c.id !== id));
             return true;
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to delete cohort";
             setError(message);
             return false;

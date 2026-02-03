@@ -14,20 +14,26 @@ function CallbackContent() {
         const token = searchParams.get("token");
         const error = searchParams.get("error");
 
-        if (token) {
+        const handleCallback = async () => {
+            if (token) {
+                try {
+                    await loginWithToken(token);
 
-            loginWithToken(token)
-                .catch((err) => {
+                } catch (err: unknown) {
+
                     console.error("Google login processing failed:", err);
                     router.push("/login?error=auth_failed");
-                });
-        } else if (error) {
-            // Handle errors returned from backend (e.g. access_denied)
-            router.push(`/login?error=${error}`);
-        } else {
-            // Fallback if accessed without parameters
-            router.push("/login");
-        }
+                }
+            } else if (error) {
+
+                router.push(`/login?error=${error}`);
+            } else {
+
+                router.push("/login");
+            }
+        };
+
+        handleCallback();
     }, [searchParams, loginWithToken, router]);
 
     return (

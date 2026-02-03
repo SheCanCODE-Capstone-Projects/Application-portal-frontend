@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { adminService, DashboardStats } from "@/services/admin/admin-service";
+import { AxiosError } from "axios";
+import { adminService, DashboardStatsResponse } from "@/services/admin/admin-service";
 
 interface UseAdminDashboardReturn {
-    stats: DashboardStats | null;
+    stats: DashboardStatsResponse | null;
     loading: boolean;
     error: string | null;
     fetchStats: () => Promise<void>;
 }
 
-const defaultStats: DashboardStats = {
+const defaultStats: DashboardStatsResponse = {
     totalApplicants: 0,
     activeCohorts: 0,
     systemRejects: 0,
@@ -24,7 +25,7 @@ const defaultStats: DashboardStats = {
 };
 
 export function useAdminDashboard(): UseAdminDashboardReturn {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [stats, setStats] = useState<DashboardStatsResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +43,8 @@ export function useAdminDashboard(): UseAdminDashboardReturn {
         try {
             const data = await adminService.getDashboardStats(token);
             setStats(data);
-        } catch (err: any) {
+        } catch (error) {
+            const err = error as AxiosError<{ message: string }>;
             const message = err.response?.data?.message || err.message || "Failed to fetch dashboard stats";
             setError(message);
             setStats(defaultStats);
