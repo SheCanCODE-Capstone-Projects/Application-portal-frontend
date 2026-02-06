@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAdminApplications } from "@/hooks/admin/useAdminApplications";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// import { useWebSocket } from "@/hooks/useWebSocket";
 import { ApplicationStatus, Application as ApplicationType } from "@/types/application/application";
 
 export default function Application() {
@@ -59,13 +59,13 @@ export default function Application() {
 
     const { applications, loading, error, fetchApplications } = useAdminApplications();
 
-    useWebSocket({
-        onMessage: (data) => {
-            if (data.type === "APPLICATION_UPDATE") {
-                fetchApplications();
-            }
-        },
-    });
+    // useWebSocket({
+    //     onMessage: (data) => {
+    //         if (data.type === "APPLICATION_UPDATE") {
+    //             fetchApplications();
+    //         }
+    //     },
+    // });
 
     useEffect(() => {
         fetchApplications();
