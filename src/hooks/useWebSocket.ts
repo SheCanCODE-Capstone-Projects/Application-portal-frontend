@@ -38,13 +38,21 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         });
 
         return () => subscription.unsubscribe();
-    }, [isConnected]); // Re-create when connection status changes
+    }, [isConnected]);
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/ws`);
+        // FIX: Handle Mixed Content (Secure vs Insecure)
+        let baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+
+        // If the page is loaded over HTTPS, ensure the WebSocket connects over HTTPS/WSS
+        if (typeof window !== 'undefined' && window.location.protocol === 'https:' && baseUrl.startsWith('http:')) {
+            baseUrl = baseUrl.replace('http:', 'https:');
+        }
+
+        const socket = new SockJS(`${baseUrl}/ws`);
 
         const stompClient = new Client({
             webSocketFactory: () => socket,
