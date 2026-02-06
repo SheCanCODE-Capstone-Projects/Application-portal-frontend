@@ -44,18 +44,16 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        // Get base URL from environment
+        // 1. Get Base URL
         let apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
-        // Remove trailing slashes
-        apiUrl = apiUrl.replace(/\/+$/, '');
+        // 2. Clean URL: Trim whitespace and remove trailing slashes
+        apiUrl = apiUrl.trim().replace(/\/+$/, '');
 
-        // PRODUCTION FIX: Force HTTPS when page is loaded over HTTPS
+        // 3. Force HTTPS protocol if the page is loaded over HTTPS
+        // This prevents "SecurityError: An insecure SockJS connection may not be initiated..."
         if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-            // Ensure URL uses HTTPS
-            if (!apiUrl.startsWith('https://')) {
-                apiUrl = apiUrl.replace(/^http:\/\//i, 'https://');
-            }
+            apiUrl = apiUrl.replace(/^http:/i, 'https:');
         }
 
         console.log('WebSocket connecting to:', apiUrl + '/ws');
