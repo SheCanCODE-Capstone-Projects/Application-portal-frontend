@@ -25,7 +25,7 @@ const menuItems = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
 
   const handleNavigation = (path: string) => {
     router.push(path);
