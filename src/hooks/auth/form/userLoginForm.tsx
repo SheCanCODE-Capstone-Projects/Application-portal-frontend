@@ -80,7 +80,7 @@ export const useLoginForm = () => {
             }
         } catch (error) {
             const err = error as AxiosError<{ message: string }>;
-            const message = err.response?.data?.message || err.message || "Login failed";
+            const message = err.message || "Login failed";
             toast.error(message);
         } finally {
             setIsLoading(false);

@@ -25,7 +25,7 @@ const menuItems = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -35,6 +35,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const handleLogout = () => {
     logout();
   };
+
 
   return (
     <>
@@ -87,11 +88,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Application Status & Logout */}
         <div className="px-4 py-4 border-t border-green-600">
-          <div className="bg-green-800 rounded-lg px-4 py-3 mb-3">
-            <p className="text-xs text-green-200">Application Status</p>
-            <p className="text-sm font-semibold">{user?.applicationStatus?.replace(/_/g, " ") || "Not Started"}</p>
-          </div>
-
           <button
             onClick={handleLogout}
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg

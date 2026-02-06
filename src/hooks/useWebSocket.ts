@@ -38,13 +38,27 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         });
 
         return () => subscription.unsubscribe();
-    }, [isConnected]); // Re-create when connection status changes
+    }, [isConnected]);
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/ws`);
+        // 1. Get Base URL
+        let apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+
+        // 2. Clean URL: Trim whitespace and remove trailing slashes
+        apiUrl = apiUrl.trim().replace(/\/+$/, '');
+
+        // 3. Force HTTPS protocol if the page is loaded over HTTPS
+        // This prevents "SecurityError: An insecure SockJS connection may not be initiated..."
+        if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+            apiUrl = apiUrl.replace(/^http:/i, 'https:');
+        }
+
+        console.log('WebSocket connecting to:', apiUrl + '/ws');
+
+        const socket = new SockJS(`${apiUrl}/ws`);
 
         const stompClient = new Client({
             webSocketFactory: () => socket,
@@ -52,7 +66,7 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
                 Authorization: `Bearer ${token}`,
             },
             debug: (str) => {
-                if (process.env.NODE_ENV === 'development') console.log(str);
+                if (process.env.NODE_ENV === 'development') console.log('STOMP:', str);
             },
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
@@ -60,7 +74,7 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         });
 
         stompClient.onConnect = () => {
-            console.log("Connected to WebSocket");
+            console.log("✅ Connected to WebSocket");
             setIsConnected(true);
             if (onMessage) {
                 stompClient.subscribe("/user/queue/notifications", (message) => {
@@ -75,10 +89,12 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         };
 
         stompClient.onStompError = (frame) => {
-            console.error("STOMP error", frame);
+            console.error("❌ STOMP error:", frame);
+            setIsConnected(false);
         };
 
         stompClient.onDisconnect = () => {
+            console.log("🔌 Disconnected from WebSocket");
             setIsConnected(false);
         };
 
@@ -86,7 +102,8 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         clientRef.current = stompClient;
 
         return () => {
-            if (clientRef.current) {
+            if (clientRef.current && clientRef.current.active) {
+                console.log("🔌 Deactivating WebSocket connection");
                 clientRef.current.deactivate();
             }
         };

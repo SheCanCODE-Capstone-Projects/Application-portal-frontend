@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { AuthView, User } from "@/types/auth/AuthView";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { userService, UserProfile } from "@/services/user/user-service";
 
 type AuthContextType = {
@@ -41,6 +41,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [view, setView] = useState<AuthView>("login");
     const router = useRouter();
     const isAuthenticated = !!user;
+
+    // Initial loading state must be true
     const [loading, setLoading] = useState(true);
 
     const decodeToken = (token: string): DecodedToken | null => {
@@ -88,48 +90,61 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return fetchUserProfile(token);
     }, [fetchUserProfile]);
 
-    const checkAuth = useCallback(async () => {
-        setLoading(true);
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            setUser(null);
-            setUserProfile(null);
-            return;
-        }
-
-        const payload = decodeToken(token);
-        if (!payload || (payload.exp && isTokenExpired(payload.exp))) {
-            logout();
-            return;
-        }
-
-        const allowedStatuses: ApplicationStatus[] = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DRAFT", "SUBMITTED"];
-        const appStatus: ApplicationStatus = allowedStatuses.includes(payload.applicationStatus as ApplicationStatus)
-            ? (payload.applicationStatus as ApplicationStatus)
-            : "NOT_STARTED";
-
-        setUser({
-            id: payload.userId,
-            email: payload.sub,
-            role: payload.role,
-            name: payload.sub.split("@")[0],
-            exp: payload.exp,
-            iat: payload.iat,
-            cohort: payload.cohortId || null,
-            applicationStatus: appStatus,
-            applicationStep: payload.applicationStep || "/applicant/apply"
-        });
-
-        await fetchUserProfile(token);
-        setLoading(false);
-    }, [fetchUserProfile]);
-
     const logout = useCallback(() => {
         localStorage.removeItem("access_token");
         setUser(null);
         setUserProfile(null);
         router.push("/login");
     }, [router]);
+
+    const checkAuth = useCallback(async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("access_token");
+
+            // Case 1: No token found
+            if (!token) {
+                setUser(null);
+                setUserProfile(null);
+                return; // Code will jump to 'finally' block
+            }
+
+            const payload = decodeToken(token);
+
+            // Case 2: Invalid or expired token
+            if (!payload || (payload.exp && isTokenExpired(payload.exp))) {
+                logout();
+                return; // Code will jump to 'finally' block
+            }
+
+            const allowedStatuses: ApplicationStatus[] = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DRAFT", "SUBMITTED"];
+            const appStatus: ApplicationStatus = allowedStatuses.includes(payload.applicationStatus as ApplicationStatus)
+                ? (payload.applicationStatus as ApplicationStatus)
+                : "NOT_STARTED";
+
+            setUser({
+                id: payload.userId,
+                email: payload.sub,
+                role: payload.role,
+                name: payload.sub.split("@")[0],
+                exp: payload.exp,
+                iat: payload.iat,
+                cohort: payload.cohortId || null,
+                applicationStatus: appStatus,
+                applicationStep: payload.applicationStep || "/applicant/apply"
+            });
+
+            await fetchUserProfile(token);
+
+        } catch (err) {
+            console.error("Auth check failed:", err);
+            setUser(null);
+            setUserProfile(null);
+        } finally {
+            // ✅ THIS IS THE FIX: Ensure loading always turns off
+            setLoading(false);
+        }
+    }, [fetchUserProfile, logout]);
 
     const loginWithToken = useCallback(async (token: string) => {
         localStorage.setItem("access_token", token);
