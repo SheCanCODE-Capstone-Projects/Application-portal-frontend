@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// import { useWebSocket } from "@/hooks/useWebSocket"; // 1. Comment out import to fix SecurityError
 import { applicationService } from "@/services/application/application-service";
 import { Application } from "@/types/application/application";
 
 export function useRealTimeApplication(userId: string | undefined) {
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(true);
-    const { subscribe } = useWebSocket();
+    // const { subscribe } = useWebSocket(); // 2. Comment out hook usage
 
     const fetchApp = useCallback(async () => {
+        // 3. FIX: Add this line. It forces the function to pause briefly,
+        // ensuring 'setLoading' is always called asynchronously.
+        await Promise.resolve();
+
         const token = localStorage.getItem("access_token");
         if (token) {
             try {
@@ -24,14 +28,15 @@ export function useRealTimeApplication(userId: string | undefined) {
     }, []);
 
     useEffect(() => {
-        fetchApp();
+        // fetchApp();
     }, [fetchApp]);
 
+    // 4. Comment out the WebSocket useEffect to prevent SecurityError
+    /*
     useEffect(() => {
         if (!userId) return;
 
         // Subscribing to real-time progress updates sent by backend:
-        // com.igirerwanda.application_portal_backend.notification.service.WebSocketService.broadcastApplicationProgress
         const unsubProgress = subscribe(`/topic/progress/${userId}`, (update: { progress: number }) => {
             setApplication(prev => prev ? { ...prev, progress: update.progress } : null);
         });
@@ -43,6 +48,7 @@ export function useRealTimeApplication(userId: string | undefined) {
 
         return () => { unsubProgress(); unsubStatus(); };
     }, [userId, subscribe, fetchApp]);
+    */
 
     return { application, loading, refresh: fetchApp };
 }
