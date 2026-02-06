@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { notificationService, Notification } from "@/services/notification/notification-service";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// import { useWebSocket } from "@/hooks/useWebSocket";
 
 interface UseNotificationsReturn {
     notifications: Notification[];
@@ -81,14 +81,14 @@ export function useNotifications(): UseNotificationsReturn {
         }
     }, []);
 
-    useWebSocket({
-        onMessage: (data) => {
-            if (data.type === "NOTIFICATION") {
-                fetchNotifications();
-                fetchUnreadCount();
-            }
-        },
-    });
+    // useWebSocket({
+    //     onMessage: (data) => {
+    //         if (data.type === "NOTIFICATION") {
+    //             fetchNotifications();
+    //             fetchUnreadCount();
+    //         }
+    //     },
+    // });
 
     return {
         notifications,
