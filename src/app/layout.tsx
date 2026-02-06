@@ -32,10 +32,10 @@ export default function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
             <AuthProvider>
-                <NotificationProvider>
+                {/*<NotificationProvider>*/}
                     {children}
                     <Toaster position="top-right" richColors />
-                </NotificationProvider>
+                {/*</NotificationProvider>*/}
             </AuthProvider>
             </body>
         </html>
