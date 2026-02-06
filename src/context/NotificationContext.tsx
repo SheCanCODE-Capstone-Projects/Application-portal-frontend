@@ -68,15 +68,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
         fetchNotifications();
 
-        const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/ws`);
+        let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
+        // FIX: Ensure secure connection if on HTTPS
+        if (typeof window !== 'undefined' && window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+            apiUrl = apiUrl.replace('http:', 'https:');
+        }
+
+        const socket = new SockJS(`${apiUrl}/ws`);
         const client = new Client({
             webSocketFactory: () => socket,
-            connectHeaders: { Authorization: `Bearer ${token}` }, // AUTH HEADER IS CRITICAL
+            connectHeaders: { Authorization: `Bearer ${token}` },
             debug: (str) => console.log('STOMP: ' + str),
             onConnect: () => {
                 console.log("Connected to WebSocket");
-                // Subscribe to own queue
-                // Backend sends to: /user/{username}/queue/notifications
                 client.subscribe(`/user/queue/notifications`, (message) => {
                     if (message.body) {
                         const newNotification: Notification = JSON.parse(message.body);
