@@ -44,12 +44,15 @@ export function useWebSocket({ onMessage }: UseWebSocketOptions = {}): UseWebSoc
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        // FIX: Handle Mixed Content (Secure vs Insecure)
+        // FIX: Match variable name and Handle Mixed Content
         let baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
-        // If the page is loaded over HTTPS, ensure the WebSocket connects over HTTPS/WSS
-        if (typeof window !== 'undefined' && window.location.protocol === 'https:' && baseUrl.startsWith('http:')) {
-            baseUrl = baseUrl.replace('http:', 'https:');
+        // Remove trailing slashes
+        baseUrl = baseUrl.replace(/\/+$/, '');
+
+        // If the page is loaded over HTTPS, ensure the WebSocket connects over HTTPS
+        if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+            baseUrl = baseUrl.replace(/^http:\/\//i, 'https://');
         }
 
         const socket = new SockJS(`${baseUrl}/ws`);
