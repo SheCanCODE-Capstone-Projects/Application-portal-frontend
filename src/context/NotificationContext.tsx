@@ -42,7 +42,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            // 🔐 Normalize response
+            // Normalize response
             const notifications: Notification[] = Array.isArray(res.data)
                 ? res.data
                 : Array.isArray(res.data?.data)
@@ -60,7 +60,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         }
     };
 
-
     // 2. Setup Real-Time WebSocket Connection
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -68,27 +67,32 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
         fetchNotifications();
 
-        // FIX: Use NEXT_PUBLIC_API_BASE_URL to match your .env
+        // Get base URL from environment
         let apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
         // Remove trailing slashes
         apiUrl = apiUrl.replace(/\/+$/, '');
 
-        // FIX: Force HTTPS connection if the frontend is loaded over HTTPS
+        // PRODUCTION FIX: Force HTTPS when page is loaded over HTTPS
         if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-            apiUrl = apiUrl.replace(/^http:\/\//i, 'https://');
+            // Ensure URL uses HTTPS
+            if (!apiUrl.startsWith('https://')) {
+                apiUrl = apiUrl.replace(/^http:\/\//i, 'https://');
+            }
         }
+
+        console.log('Notification WebSocket connecting to:', apiUrl + '/ws');
 
         const socket = new SockJS(`${apiUrl}/ws`);
 
         const client = new Client({
             webSocketFactory: () => socket,
-            connectHeaders: { Authorization: `Bearer ${token}` }, // AUTH HEADER IS CRITICAL
+            connectHeaders: { Authorization: `Bearer ${token}` },
             debug: (str) => {
-                if (process.env.NODE_ENV === 'development') console.log('STOMP: ' + str)
+                if (process.env.NODE_ENV === 'development') console.log('STOMP:', str);
             },
             onConnect: () => {
-                console.log("Connected to WebSocket");
+                console.log("✅ Connected to Notification WebSocket");
                 client.subscribe(`/user/queue/notifications`, (message) => {
                     if (message.body) {
                         const newNotification: Notification = JSON.parse(message.body);
@@ -97,7 +101,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 });
             },
             onStompError: (frame) => {
-                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('❌ Broker reported error:', frame.headers['message']);
             },
         });
 
@@ -105,11 +109,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         stompClientRef.current = client;
 
         return () => {
-            if (client.active) client.deactivate();
+            if (client.active) {
+                console.log("🔌 Deactivating Notification WebSocket");
+                client.deactivate();
+            }
         };
     }, []);
 
-    // 3. Handle Incoming
+    // 3. Handle Incoming Notification
     const handleNewNotification = (notification: Notification) => {
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
@@ -131,7 +138,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             await api.put(`/api/v1/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (error) { console.error(error); }
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
+        }
     };
 
     const markAllAsRead = async () => {
@@ -139,7 +148,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             await api.put(`/api/v1/notifications/read-all`);
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
             setUnreadCount(0);
-        } catch (error) { console.error(error); }
+        } catch (error) {
+            console.error('Failed to mark all as read:', error);
+        }
     };
 
     return (

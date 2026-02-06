@@ -22,6 +22,24 @@ const menuItems = [
   { icon: FileText, label: "Applications", path: "/applicant/dashboard/applications" },
 ];
 
+
+const getStatusStyles = (status?: string) => {
+  switch (status) {
+    case "APPROVED":
+    case "ACCEPTED":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "REJECTED":
+    case "SYSTEM_REJECTED":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "PENDING":
+    case "SUBMITTED":
+    case "UNDER_REVIEW":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -35,6 +53,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const handleLogout = () => {
     logout();
   };
+
+
 
   return (
     <>
@@ -87,9 +107,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Application Status & Logout */}
         <div className="px-4 py-4 border-t border-green-600">
-          <div className="bg-green-800 rounded-lg px-4 py-3 mb-3">
-            <p className="text-xs text-green-200">Application Status</p>
-            <p className="text-sm font-semibold">{user?.applicationStatus?.replace(/_/g, " ") || "Not Started"}</p>
+          <div className={`rounded-lg px-4 py-3 mb-3 border ${getStatusStyles(user?.applicationStatus)}`}>
+            <p className="text-[10px] uppercase tracking-wider opacity-70 font-bold">Your Status</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold">
+                {user?.applicationStatus?.replace(/_/g, " ") || "No Application"}
+              </p>
+              {/* Optional: Add a small pulsing dot for pending status */}
+        {/*      {user?.applicationStatus === "PENDING" && (*/}
+        {/*          <span className="relative flex h-2 w-2">*/}
+        {/*  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>*/}
+        {/*  <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>*/}
+        {/*</span>*/}
+        {/*      )}*/}
+            </div>
           </div>
 
           <button
