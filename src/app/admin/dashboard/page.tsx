@@ -54,6 +54,10 @@ interface graphicalCard {
     chartData?: { date: string; count: number }[];
 }
 
+type Props = {
+    bg: string;
+};
+
 export default function DashboardPage() {
     const [stats, setStats] = useState<ExtendedDashboardStats | null>(null);
     const [applications, setApplications] = useState<Application[]>([]);
@@ -67,12 +71,7 @@ export default function DashboardPage() {
     useEffect(() => {
         const loadDashboardData = async () => {
             const token = localStorage.getItem("access_token");
-
-            // FIX: If no token, stop loading and return (Guard will handle redirect)
-            if (!token) {
-                setLoading(false);
-                return;
-            }
+            if (!token) return;
 
             try {
                 const [statsData, appsData] = await Promise.all([
@@ -370,6 +369,7 @@ export default function DashboardPage() {
 }
 
 function GraphicalCard({ title, value, icon, trend, color, bg, chartData, progress, subtext, isWarning }: graphicalCard) {
+    // Determine a trend direction
     const isUp = trend && (trend.includes('+') || trend === 'Active');
     const isDown = trend && trend.includes('-');
 

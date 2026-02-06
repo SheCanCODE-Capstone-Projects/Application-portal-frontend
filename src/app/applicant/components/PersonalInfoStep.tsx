@@ -58,8 +58,6 @@ const COUNTRY_CODES = [
 ];
 
 export default function PersonalInfoStep({ initialData, onNext, saving }: Props) {
-
-
   const getInitialPhone = () => {
     if (initialData?.phone) {
       const matchedCode = COUNTRY_CODES.find((c) => initialData.phone.startsWith(c.code));
@@ -75,7 +73,6 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
   };
 
   const initialPhoneState = getInitialPhone();
-
 
   const [data, setData] = useState<PersonalInfoDto>(() => ({
     fullName: "",
@@ -94,16 +91,13 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
   const [errors, setErrors] = useState<Partial<Record<keyof PersonalInfoSchemaType, string>>>({});
 
   const handleSubmit = () => {
-    // 1. Construct Phone
-    const fullPhone = `${phoneCode}${phoneNumber.replace(/^0+/, "")}`; // Remove leading zeros
+    const fullPhone = `${phoneCode}${phoneNumber.replace(/^0+/, "")}`;
     const payload = { ...data, phone: fullPhone };
 
-    // 2. Zod Validation
     const result = personalInfoSchema.safeParse(payload);
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-
       const newErrors: Record<string, string> = {};
       (Object.keys(fieldErrors) as Array<keyof typeof fieldErrors>).forEach((key) => {
         const messages = fieldErrors[key];
@@ -117,29 +111,27 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
       return;
     }
 
-    // 3. Libphonenumber Validation
     if (!isValidPhoneNumber(fullPhone)) {
       setErrors((prev) => ({ ...prev, phone: "Invalid phone number format" }));
       toast.error("Please enter a valid phone number.");
       return;
     }
 
-    // 4. Submit
     onNext(payload);
   };
 
   return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Full Name */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <User size={14} /> Full Name *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${
+                className={`w-full p-3 sm:p-4 bg-gray-50 border ${
                     errors.fullName ? "border-red-500 bg-red-50" : "border-gray-200"
-                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                } rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base`}
                 placeholder="e.g. Keza Teta"
                 value={data.fullName}
                 onChange={(e) => {
@@ -158,9 +150,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
               <Mail size={14} /> Email Address *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${
+                className={`w-full p-3 sm:p-4 bg-gray-50 border ${
                     errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
-                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                } rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base`}
                 placeholder="name@example.com"
                 value={data.email}
                 onChange={(e) => {
@@ -179,14 +171,14 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
               <Phone size={14} /> Phone Number *
             </label>
             <div className="flex gap-2">
-              <div className="w-[140px]">
+              <div className="w-[100px] sm:w-[140px]">
                 <Select value={phoneCode} onValueChange={setPhoneCode}>
-                  <SelectTrigger className="h-[58px] bg-gray-50 border-gray-200 rounded-2xl">
+                  <SelectTrigger className="h-12 sm:h-[58px] bg-gray-50 border-gray-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm">
                     <SelectValue placeholder="+250" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200 z-[9999]">
                     {COUNTRY_CODES.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>
+                        <SelectItem key={c.code} value={c.code} className="text-xs sm:text-sm">
                           {c.label}
                         </SelectItem>
                     ))}
@@ -194,9 +186,9 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
                 </Select>
               </div>
               <input
-                  className={`flex-1 p-4 bg-gray-50 border ${
+                  className={`flex-1 p-3 sm:p-4 bg-gray-50 border ${
                       errors.phone ? "border-red-500 bg-red-50" : "border-gray-200"
-                  } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                  } rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base`}
                   placeholder="788 123 456"
                   value={phoneNumber}
                   type="tel"
@@ -217,28 +209,25 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
               <Globe size={14} /> Nationality *
             </label>
             <input
-                className={`w-full p-4 bg-gray-50 border ${
-                    errors.nationality
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200"
-                } rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+                className={`w-full p-3 sm:p-4 bg-gray-50 border ${
+                    errors.nationality ? "border-red-500 bg-red-50" : "border-gray-200"
+                } rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base`}
                 placeholder="Rwandan"
                 value={data.nationality}
                 onChange={(e) => setData({ ...data, nationality: e.target.value })}
             />
           </div>
 
-          {/* Gender - Overlay Select */}
+          {/* Gender */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <User size={14} /> Gender *
             </label>
             <Select
                 value={data.gender}
-                // Explicitly cast the value from the string returned by Select to the union type
                 onValueChange={(val) => setData({ ...data, gender: val as PersonalInfoDto["gender"] })}
             >
-              <SelectTrigger className="w-full h-[58px] bg-gray-50 border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500">
+              <SelectTrigger className="w-full h-12 sm:h-[58px] bg-gray-50 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 text-sm sm:text-base">
                 <SelectValue placeholder="Select Gender" />
               </SelectTrigger>
               <SelectContent className="bg-white border-gray-100 z-[9999]">
@@ -253,19 +242,18 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
             )}
           </div>
 
-          {/* Marital Status - Overlay Select */}
+          {/* Marital Status */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <Heart size={14} /> Marital Status *
             </label>
             <Select
                 value={data.maritalStatus}
-                // Explicitly cast the value from the string returned by Select to the union type
                 onValueChange={(val) =>
                     setData({ ...data, maritalStatus: val as PersonalInfoDto["maritalStatus"] })
                 }
             >
-              <SelectTrigger className="w-full h-[58px] bg-gray-50 border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500">
+              <SelectTrigger className="w-full h-12 sm:h-[58px] bg-gray-50 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 text-sm sm:text-base">
                 <SelectValue placeholder="Select Status" />
               </SelectTrigger>
               <SelectContent className="bg-white border-gray-100 z-[9999]">
@@ -278,12 +266,12 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
           </div>
 
           {/* Social Links */}
-          <div className="md:col-span-2 space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <LinkIcon size={14} /> LinkedIn / Portfolio URL
             </label>
             <input
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                className="w-full p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base"
                 placeholder="https://linkedin.com/in/..."
                 value={data.socialLinks || ""}
                 onChange={(e) => setData({ ...data, socialLinks: e.target.value })}
@@ -291,13 +279,13 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
           </div>
 
           {/* Additional Info */}
-          <div className="md:col-span-2 space-y-2">
+          <div className="sm:col-span-2 space-y-2">
             <label className="text-xs font-bold text-emerald-900 uppercase tracking-widest flex items-center gap-2">
               <Info size={14} /> Additional Information
             </label>
             <textarea
                 rows={3}
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all resize-none"
+                className="w-full p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all resize-none text-sm sm:text-base"
                 placeholder="Any other details we should know about..."
                 value={data.additionalInformation || ""}
                 onChange={(e) =>
@@ -311,15 +299,15 @@ export default function PersonalInfoStep({ initialData, onNext, saving }: Props)
           <button
               onClick={handleSubmit}
               disabled={saving}
-              className="w-full md:w-auto px-10 py-4 bg-emerald-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-emerald-700 text-white rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {saving ? (
                 <>
-                  <Loader2 className="animate-spin w-5 h-5" /> Saving...
+                  <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" /> Saving...
                 </>
             ) : (
                 <>
-                  Save & Continue <ArrowRight size={18} />
+                  Save & Continue <ArrowRight size={16} className="sm:w-5 sm:h-5" />
                 </>
             )}
           </button>
