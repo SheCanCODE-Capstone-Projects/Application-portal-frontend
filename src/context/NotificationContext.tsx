@@ -68,18 +68,25 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
         fetchNotifications();
 
-        let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        // FIX: Use NEXT_PUBLIC_API_BASE_URL to match your .env
+        let apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
-        // FIX: Ensure secure connection if on HTTPS
-        if (typeof window !== 'undefined' && window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
-            apiUrl = apiUrl.replace('http:', 'https:');
+        // Remove trailing slashes
+        apiUrl = apiUrl.replace(/\/+$/, '');
+
+        // FIX: Force HTTPS connection if the frontend is loaded over HTTPS
+        if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+            apiUrl = apiUrl.replace(/^http:\/\//i, 'https://');
         }
 
         const socket = new SockJS(`${apiUrl}/ws`);
+
         const client = new Client({
             webSocketFactory: () => socket,
-            connectHeaders: { Authorization: `Bearer ${token}` },
-            debug: (str) => console.log('STOMP: ' + str),
+            connectHeaders: { Authorization: `Bearer ${token}` }, // AUTH HEADER IS CRITICAL
+            debug: (str) => {
+                if (process.env.NODE_ENV === 'development') console.log('STOMP: ' + str)
+            },
             onConnect: () => {
                 console.log("Connected to WebSocket");
                 client.subscribe(`/user/queue/notifications`, (message) => {
