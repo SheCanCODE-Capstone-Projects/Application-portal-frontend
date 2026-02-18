@@ -47,22 +47,13 @@ export default function ReportsPage() {
     const dailyTrend = stats.charts?.dailyTrend || [];
 
     return (
-        <div className="space-y-8 max-w-[1200px] mx-auto pb-10">
-            <div className="flex flex-col sm:flex-row justify-between items-end border-b border-gray-200 pb-6">
+        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+            <div className="flex flex-col sm:flex-row justify-between items-end border-gray-200 pb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">System Performance Report</h1>
-                    <div className="flex items-center gap-2 mt-2 text-gray-500">
-                        <Calendar size={16} />
-                        <span>Generated on {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    </div>
                 </div>
                 <div className="flex gap-3 mt-4 sm:mt-0 print:hidden">
-                    <Button onClick={() => window.print()} variant="outline" className="border-gray-300">
-                        <Printer className="mr-2 h-4 w-4"/> Print
-                    </Button>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                        <Download className="mr-2 h-4 w-4"/> Download PDF
-                    </Button>
+                    <span>Generated on {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 </div>
             </div>
 

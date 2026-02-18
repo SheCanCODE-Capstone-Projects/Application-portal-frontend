@@ -55,7 +55,7 @@ export default function ProfilePage() {
 
   return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-8xl mx-auto">
           {/* Profile Header */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
             <div className="flex flex-col md:flex-row items-center md:space-x-6 space-y-4 md:space-y-0">

@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation"; // Import useParam
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail";
 import { useResendVerification } from "@/hooks/auth/useResendVerification";
 import { Loader2 } from "lucide-react"; // Assuming you have this icon, consistent with your other pages
+import { AuroraBackground } from "@/components/background/page";
 
 export default function EmailVerification() {
     // 1. Get token from the URL Path (because file is in [token] folder)
@@ -29,6 +30,7 @@ export default function EmailVerification() {
     };
 
     return (
+        <AuroraBackground>
         <div className="flex min-h-screen items-center justify-center px-4 py-10 w-full">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl ring-1 ring-[#d7cfc8] z-40">
                 <div className="mb-6">
@@ -146,5 +148,6 @@ export default function EmailVerification() {
                 </div>
             </div>
         </div>
+        </AuroraBackground>
     );
 }

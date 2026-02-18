@@ -80,8 +80,6 @@
                             console.error("Application creation failed:", createErr);
                             const errorMsg = createErr.response?.data?.message || createErr.message || "Failed to initialize application.";
 
-                            // Handle the specific notification error gracefully if possible,
-                            // though usually a 500 will stop the app creation.
                             if (mounted) {
                                 setError(errorMsg);
                                 setStatus("error");
@@ -148,14 +146,6 @@
             <AuroraBackground>
                 <div className="min-h-screen flex items-center justify-center p-4 z-30">
                     <div className="max-w-md w-full">
-                        {/* Logo */}
-                        <div className="text-center mb-8">
-                            <div className="w-20 h-20 bg-gradient-to-br from-green-600 to-green-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-green-200">
-                                <GraduationCap className="w-10 h-10 text-white" />
-                            </div>
-                            <h1 className="text-2xl font-bold text-slate-900 mt-4">Igire Rwanda</h1>
-                            <p className="text-slate-500 text-sm">Application Portal</p>
-                        </div>
 
                         {/* Main Card */}
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">

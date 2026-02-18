@@ -5,7 +5,7 @@ import { useAdminApplications } from "@/hooks/admin/useAdminApplications";
 import { ApplicationStatus } from "@/types/application/application";
 import { useRouter } from "next/navigation";
 import {
-    AlertTriangle, Search, Eye, RefreshCw, FileX, Calendar, ArrowRight
+    AlertTriangle, Search, RefreshCw, FileX, ArrowRight
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,18 +37,18 @@ export default function RejectsPage() {
             <header className="flex justify-between items-start">
                 <div>
                     <h1 className="text-3xl font-bold text-rose-800 flex items-center gap-2">
-                        <FileX className="h-8 w-8" /> Automated Rejections
+                        Automated Rejections
                     </h1>
                     <p className="text-gray-500 mt-1">
                         Applicants filtered out by system criteria.
                     </p>
                 </div>
-                <div className="bg-rose-50 border border-rose-100 px-4 py-2 rounded-lg text-rose-800 text-sm font-medium">
+                <div className="px-4 py-2 rounded-lg text-rose-800 text-sm font-medium">
                     Count: {rejects.length}
                 </div>
             </header>
 
-            <Card className="border-rose-100 shadow-sm">
+            <Card className="border-rose-100 shadow-full rounded-lg">
                 <CardHeader className="border-b border-gray-100 bg-white pb-4">
                     <div className="relative max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -93,7 +93,7 @@ export default function RejectsPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-2 text-rose-700 bg-rose-50 px-3 py-1.5 rounded-md w-fit text-sm font-medium border border-rose-100">
+                                            <div className="flex items-center gap-2 text-rose-700 bg-rose-50 px-3 py-1.5  w-fit text-sm font-medium">
                                                 <AlertTriangle size={14} />
                                                 {app.systemRejectionReason || "System Criteria"}
                                             </div>

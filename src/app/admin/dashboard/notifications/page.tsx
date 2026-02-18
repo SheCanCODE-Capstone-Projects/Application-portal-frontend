@@ -126,15 +126,6 @@ export default function NotificationsPage() {
                 </div>
                 <div className="flex gap-3">
                     <Button
-                        onClick={fetchNotifications}
-                        variant="outline"
-                        size="icon"
-                        className="bg-white border-gray-200"
-                        title="Refresh"
-                    >
-                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    </Button>
-                    <Button
                         onClick={markAllAsRead}
                         variant="outline"
                         className="bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
