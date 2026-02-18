@@ -11,26 +11,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     return (
         <>
-<<<<<<< HEAD
             <div className="flex h-screen bg-gray-50 overflow-hidden">
                 <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-=======
-            {/*<AdminGuard>*/}
-            {/* h-screen ensures the outer container doesn't scroll */}
-            <div className="flex h-screen bg-gray-50 overflow-hidden">
-                <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
->>>>>>> Production
                 <div className="flex flex-col flex-1 w-0 overflow-hidden">
                     <Header setSidebarOpen={setSidebarOpen} />
                     <MainContent>{children}</MainContent>
                 </div>
             </div>
-<<<<<<< HEAD
         </>
-=======
-        {/*</AdminGuard>*/}
-            </>
->>>>>>> Production
     );
 }

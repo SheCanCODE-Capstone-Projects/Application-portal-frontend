@@ -140,8 +140,8 @@ export default function DashboardPage() {
             if (appData.personalInfo) completed++;
             if (appData.education) completed++;
             if (appData.motivation) completed++;
-            if (appData.documents?.length > 0) completed++;
-            if (appData.emergencyContacts?.length > 0) completed++;
+            if ((appData.documents?.length ?? 0) > 0) completed++;
+            if ((appData.emergencyContacts?.length ?? 0) > 0) completed++;
             if (appData.disability) completed++;
             if (appData.vulnerability) completed++;
 
@@ -583,7 +583,7 @@ export default function DashboardPage() {
                         <p className="text-sm font-semibold text-green-900">Application Started</p>
                       </div>
                       <p className="text-xs text-green-700">
-                        Your application for {application.cohortName} has been initialized.
+                        Your application for {application?.cohortName} has been initialized.
                       </p>
                     </div>
                 )}

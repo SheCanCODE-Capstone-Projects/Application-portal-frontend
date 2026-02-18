@@ -23,6 +23,7 @@ export interface Application {
     createdAt: string;    // ISO LocalDateTime
     personalInfo?: PersonalInfoDto;
     education?: EducationDto;
+    interviewDate?: string; // ISO LocalDateTime
     motivation?: MotivationDto;
     documents?: DocumentDto[];
     emergencyContacts?: EmergencyContactDto[];

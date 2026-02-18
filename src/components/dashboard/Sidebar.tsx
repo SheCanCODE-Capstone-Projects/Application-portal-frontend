@@ -30,14 +30,10 @@ const menuItems = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-<<<<<<< HEAD
   const { logout, user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const unreadNotifications = 3;
-=======
-  const { logout } = useAuth();
->>>>>>> Production
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -182,7 +178,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 )}
               </button>
 
-<<<<<<< HEAD
               {/* Tooltip for Notifications */}
               {isCollapsed && (
                   <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block">
@@ -261,20 +256,5 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </aside>
       </>
-=======
-        {/* Application Status & Logout */}
-        <div className="px-4 py-4 border-t border-green-600">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg
-              text-green-100 hover:bg-red-600 hover:text-white transition-colors duration-200"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
-          </button>
-        </div>
-      </aside>
-    </>
->>>>>>> Production
   );
 }
