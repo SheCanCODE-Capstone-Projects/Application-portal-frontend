@@ -88,7 +88,6 @@
                         return;
                     }
 
-                    // CASE: Has Application -> Check Status
                     if (mounted) {
                         setProgress(100);
                         setStatus("redirecting");

@@ -10,7 +10,7 @@ import EducationStep from '../components/EducationStep';
 import MotivationStep from '../components/MotivationStep';
 import DocumentsStep from '../components/DocumentsStep';
 import DisabilityStep from '../components/DisabilityStep';
-import VulnerabilityStep from '../components/VulnerabilityStep'; // New Component
+import VulnerabilityStep from '../components/VulnerabilityStep';
 import EmergencyContactStep from '../components/EmergencyContactStep';
 import ReviewStep from '../components/ReviewStep';
 import { Loader2, Sparkles } from 'lucide-react';
@@ -81,7 +81,6 @@ export default function ApplyPage() {
         setSaving(true);
         try {
             let updatedApp;
-            // Updated Switch for new steps
             switch (currentStep) {
                 case 1: updatedApp = await applicationService.savePersonalInfo(appId, data, token); break;
                 case 2: updatedApp = await applicationService.saveEducation(appId, data, token); break;
@@ -135,14 +134,13 @@ export default function ApplyPage() {
 
     if (initializing) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-                <Loader2 className="w-12 h-12 animate-spin text-emerald-600 mb-4" />
-                <p className="text-gray-600 font-medium tracking-tight">Loading application...</p>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+                <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 animate-spin text-emerald-600 mb-4" />
+                <p className="text-gray-600 font-medium tracking-tight text-sm sm:text-base">Loading application...</p>
             </div>
         );
     }
 
-    // Updated Steps Array
     const steps = [
         { number: 1, title: 'Personal' },
         { number: 2, title: 'Education' },
@@ -156,24 +154,32 @@ export default function ApplyPage() {
 
     return (
         <AuroraBackground>
-            <div className="min-h-screen py-12 px-4 z-10">
-                <div className="max-w-12xl mx-auto">
-                    <div className="bg-white rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-gray-100 overflow-hidden transition-all">
-                        <div className="bg-[#0f5d3f] p-10 text-white relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="min-h-screen py-6 sm:py-12 px-3 sm:px-4 z-10">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-gray-100 overflow-hidden transition-all">
+                        {/* Header */}
+                        <div className="bg-[#0f5d3f] p-6 sm:p-10 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
                             <div className="relative z-10">
-                                <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-                                    Application Portal <Sparkles className="text-yellow-400" />
+                                <h1 className="text-2xl sm:text-4xl font-black tracking-tight flex items-center gap-2 sm:gap-3 flex-wrap">
+                                    Application Portal
+                                    <Sparkles className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" />
                                 </h1>
-                                <p className="text-emerald-100/80 mt-2 font-medium">Complete your profile to join the next cohort.</p>
+                                <p className="text-emerald-100/80 mt-2 font-medium text-sm sm:text-base">
+                                    Complete your profile to join the next cohort.
+                                </p>
                             </div>
 
-                            <div className="mt-10 overflow-x-auto pb-4">
+                            {/* Progress Stepper - Scrollable on mobile */}
+                            <div className="mt-6 sm:mt-10 overflow-x-auto pb-4 -mx-6 px-6 sm:mx-0 sm:px-0">
                                 <ProgressStepper currentStep={currentStep} steps={steps} />
                             </div>
                         </div>
 
-                        <div className="p-8 md:p-12">
+                        {/* Form Content */}
+                        <div className="p-4 sm:p-8 md:p-12">
                             {currentStep === 1 && <PersonalInfoStep initialData={applicationData?.personalInfo} onNext={handleNext} saving={saving} />}
                             {currentStep === 2 && <EducationStep initialData={applicationData?.education} onNext={handleNext} onBack={handleBack} saving={saving} />}
                             {currentStep === 3 && <MotivationStep initialData={applicationData?.motivation} onNext={handleNext} onBack={handleBack} saving={saving} />}
