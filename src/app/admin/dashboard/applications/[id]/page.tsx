@@ -85,7 +85,7 @@ export default function ApplicantDetailPage() {
     const isSystemRejected = applicant.status === ApplicationStatus.SYSTEM_REJECTED || applicant.isSystemRejected;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 mx-auto space-y-6">
             <div className="flex justify-between items-center">
                 <button onClick={() => router.back()} className="flex items-center text-gray-500 hover:text-emerald-700">
                     <ArrowLeft className="mr-2" size={18} /> Back to List
@@ -111,7 +111,7 @@ export default function ApplicantDetailPage() {
             )}
 
             {/* Header Card */}
-            <Card className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-l-4 border-l-emerald-500 shadow-md">
+            <Card className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-md">
                 <div className="flex items-center gap-4">
                     <div className="h-16 w-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-2xl font-bold text-gray-600 shadow-inner">
                         {applicant.personalInfo?.fullName?.charAt(0).toUpperCase() || "A"}

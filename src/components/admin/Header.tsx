@@ -42,15 +42,6 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
           >
             <Menu size={24} />
           </button>
-
-          <div className="hidden md:flex items-center relative">
-            <Search className="absolute left-3 text-gray-400" size={16} />
-            <input
-                type="text"
-                placeholder="Global Search..."
-                className="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-full text-sm focus:ring-2 focus:ring-emerald-500 w-64 transition-all"
-            />
-          </div>
         </div>
 
         <div className="flex items-center gap-6">

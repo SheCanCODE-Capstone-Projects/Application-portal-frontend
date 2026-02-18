@@ -80,8 +80,6 @@
                             console.error("Application creation failed:", createErr);
                             const errorMsg = createErr.response?.data?.message || createErr.message || "Failed to initialize application.";
 
-                            // Handle the specific notification error gracefully if possible,
-                            // though usually a 500 will stop the app creation.
                             if (mounted) {
                                 setError(errorMsg);
                                 setStatus("error");

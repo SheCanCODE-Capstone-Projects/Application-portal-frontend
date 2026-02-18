@@ -127,7 +127,7 @@ export default function ApplicationsPage() {
 
   return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-8xl mx-auto">
           {/* Application Summary */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
