@@ -2,8 +2,7 @@ import { api } from "@/lib/api/api";
 import { ADMIN_ROUTES } from "./admin-controller";
 import { Application, ApplicationStatus, ApplicationQueryParams } from "@/types/application/application";
 import { ApiResponse } from "@/types/api";
-
-
+import { PaginatedResponse, SynchronizedUser } from "@/types/user/user";
 
 export interface DailyTrendItem {
     date: string;
@@ -34,6 +33,8 @@ export interface DashboardStatsResponse {
     activeCohorts: number;
     systemRejects: number;
     successfulRegisters: number;
+    duplicateRejections: number;
+    synchronizedUsers: number;
     trends: DashboardTrends;
     charts?: DashboardCharts;
 }
@@ -46,6 +47,8 @@ export interface UserResponseDto {
     cohortId: string | null;
     cohortName: string | null;
     createdAt: string;
+    provider?: string;
+    role?: string;
 }
 
 export const adminService = {
@@ -63,7 +66,6 @@ export const adminService = {
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        // FIX: Handle direct array response based on your JSON logs
         if (Array.isArray(res.data)) {
             return res.data;
         }
@@ -78,13 +80,20 @@ export const adminService = {
         });
     },
 
+    // --- NEW: Synchronized Users (Added /api/v1 prefix) ---
+    getSynchronizedUsers: async (token: string, page = 0, size = 10): Promise<PaginatedResponse<SynchronizedUser>> => {
+        const response = await api.get(`/api/v1/admin/users/synchronized?page=${page}&size=${size}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    },
+
     // --- Applications ---
     getAllApplications: async (token: string, params?: ApplicationQueryParams): Promise<Application[]> => {
         const res = await api.get(ADMIN_ROUTES.ALL_APPLICATIONS, {
             headers: { Authorization: `Bearer ${token}` },
             params,
         });
-        // Handle potentially different response structures for applications too
         if (Array.isArray(res.data)) return res.data;
         return res.data.data || [];
     },
@@ -92,7 +101,6 @@ export const adminService = {
     getApplicationById: async (token: string, id: string): Promise<Application> => {
         const url = ADMIN_ROUTES.APPLICATION_BY_ID.replace("{id}", id);
         const res = await api.get(url, { headers: { Authorization: `Bearer ${token}` } });
-        // Handle potentially different response structures
         if (res.data && !res.data.data && res.data.id) return res.data;
         return res.data.data;
     },

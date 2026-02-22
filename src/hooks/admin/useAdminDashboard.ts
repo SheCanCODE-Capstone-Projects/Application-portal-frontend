@@ -16,6 +16,8 @@ const defaultStats: DashboardStatsResponse = {
     activeCohorts: 0,
     systemRejects: 0,
     successfulRegisters: 0,
+    duplicateRejections: 0,
+    synchronizedUsers: 0,
     trends: {
         applicants: "0%",
         cohorts: "0",
