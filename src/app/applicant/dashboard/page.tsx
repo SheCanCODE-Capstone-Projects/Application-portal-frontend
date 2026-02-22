@@ -525,24 +525,32 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-
+            {/* Calendar */}
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
+              {/* Header */}
+              <div className="flex flex-start justify-between mb-4">
                 <div className="flex flex-col">
                   <h3 className="text-lg font-bold text-gray-800 capitalize">
                     {format(today, 'MMMM yyyy')}
                   </h3>
                   {interviewDate && (
-                      <span className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded-md w-fit mt-1">
-          Interview Scheduled
-        </span>
+                      <div className="mt-2 flex flex-col gap-2">
+                        <span className="text-xs text-purple-600 font-semibold bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-md w-fit">
+                          Interview Scheduled
+                        </span>
+                        <span className="text-xs text-gray-600 font-medium flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-200 w-fit shadow-sm">
+                          <Clock className="w-3.5 h-3.5 text-gray-500" />
+                          {format(interviewDate, "MMM d, yyyy • h:mm a")}
+                        </span>
+                      </div>
                   )}
                 </div>
-                <div className="p-2 bg-gray-50 rounded-lg">
+                <div className="p-2 bg-gray-50 rounded-lg h-fit">
                   <Calendar className="w-5 h-5 text-gray-400" />
                 </div>
               </div>
 
+              {/* Days Header */}
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
                     <div key={day} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400">
@@ -551,8 +559,10 @@ export default function DashboardPage() {
                 ))}
               </div>
 
+              {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((day) => {
+                  // Logic for Styles
                   const isCurrentMonth = isSameMonth(day, monthStart);
                   const isDayToday = isToday(day);
                   const isInterview = interviewDate ? isSameDay(day, interviewDate) : false;
@@ -561,14 +571,15 @@ export default function DashboardPage() {
                       <div
                           key={day.toString()}
                           className={`
-            relative h-9 flex items-center justify-center rounded-lg text-sm transition-all
-            ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
-            ${isDayToday && !isInterview ? 'bg-green-100 text-green-700 font-bold border border-green-200' : ''}
-            ${isInterview ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-200' : 'hover:bg-gray-50'}
-          `}
+                            relative h-9 flex items-center justify-center rounded-lg text-sm transition-all
+                            ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
+                            ${isDayToday && !isInterview ? 'bg-green-100 text-green-700 font-bold border border-green-200' : ''}
+                            ${isInterview ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-200' : 'hover:bg-gray-50'}
+                          `}
                       >
                         {format(day, 'd')}
 
+                        {/* Dot Indicators */}
                         <div className="absolute bottom-1 flex gap-0.5">
                           {isDayToday && !isInterview && (
                               <div className="w-1 h-1 bg-green-500 rounded-full"></div>
@@ -582,21 +593,22 @@ export default function DashboardPage() {
                 })}
               </div>
 
+              {/* Legend / Footer */}
               <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span className="text-gray-500">Today</span>
+                  <span className="text-gray-500 font-medium">Today</span>
                 </div>
                 {interviewDate && (
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-purple-600"></div>
-                      <span className="text-gray-500">Interview</span>
+                      <span className="text-gray-500 font-medium">Interview Day</span>
                     </div>
                 )}
               </div>
             </div>
-          </div>
         </div>
+      </div>
       </div>
   );
 }
