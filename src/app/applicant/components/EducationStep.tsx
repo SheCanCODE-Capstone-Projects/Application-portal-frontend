@@ -115,7 +115,7 @@ export default function EducationStep({ initialData, onNext, onBack, saving }: a
               onClick={onBack}
               className="flex-1 py-4 border-2 border-gray-100 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 flex items-center justify-center gap-2 transition-all"
           >
-            <ArrowLeft size={18} /> Previous Step
+            <ArrowLeft size={18} /> back
           </button>
           <button
               type="button"
