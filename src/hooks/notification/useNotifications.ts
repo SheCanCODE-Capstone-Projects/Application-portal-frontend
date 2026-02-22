@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { notificationService, Notification } from "@/services/notification/notification-service";
-// import { useWebSocket } from "@/hooks/useWebSocket";
+
 
 interface UseNotificationsReturn {
     notifications: Notification[];
@@ -46,8 +46,8 @@ export function useNotifications(): UseNotificationsReturn {
         if (!token) return;
 
         try {
-            const data = await notificationService.getUnreadCount(token);
-            setUnreadCount(data.count || 0);
+            const count = await notificationService.getUnreadCount(token);
+            setUnreadCount(count || 0);
         } catch (err: unknown) {
             console.error("Failed to fetch unread count:", err);
         }
@@ -80,15 +80,6 @@ export function useNotifications(): UseNotificationsReturn {
             console.error("Failed to mark all as read:", err);
         }
     }, []);
-
-    // useWebSocket({
-    //     onMessage: (data) => {
-    //         if (data.type === "NOTIFICATION") {
-    //             fetchNotifications();
-    //             fetchUnreadCount();
-    //         }
-    //     },
-    // });
 
     return {
         notifications,

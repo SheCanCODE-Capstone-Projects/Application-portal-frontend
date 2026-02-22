@@ -14,10 +14,11 @@ export default function NotificationDropdown() {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5 text-gray-600" />
+                <Button variant="ghost" size="icon" className="relative h-10 w-10">
+                    <Bell className="h-6 w-6 text-gray-600" />
+
                     {unreadCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                        <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}
@@ -48,14 +49,14 @@ export default function NotificationDropdown() {
                                     key={notification.id}
                                     className={cn(
                                         "flex flex-col gap-1 p-4 border-b hover:bg-gray-50 transition-colors cursor-pointer relative",
-                                        !notification.isRead && "bg-blue-50/40"
+                                        !notification.read && "bg-blue-50/40"
                                     )}
-                                    onClick={() => !notification.isRead && markAsRead(notification.id)}
+                                    onClick={() => !notification.read && markAsRead(notification.id)}
                                 >
-                                    {!notification.isRead && (
+                                    {!notification.read && (
                                         <span className="absolute top-4 right-4 h-2 w-2 rounded-full bg-blue-500" />
                                     )}
-                                    <h5 className={cn("text-sm font-medium", !notification.isRead && "text-blue-700")}>
+                                    <h5 className={cn("text-sm", !notification.read ? "font-bold text-gray-900" : "font-medium text-gray-600")}>
                                         {notification.title}
                                     </h5>
                                     <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">

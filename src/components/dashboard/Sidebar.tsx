@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   User,
@@ -13,6 +13,8 @@ import {
   Activity
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useNotifications } from "@/context/NotificationContext";
+import { applicationService } from "@/services/application/application-service";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/share/logo";
 
@@ -31,9 +33,25 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
+  const { unreadCount } = useNotifications(); // 1. Use real unread count
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [realStatus, setRealStatus] = useState<string | null>(null);
 
-  const unreadNotifications = 3;
+  // 2. Fetch the real application status
+  useEffect(() => {
+    const fetchRealStatus = async () => {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        try {
+          const app = await applicationService.getMyApplication(token);
+          if (app) setRealStatus(app.status);
+        } catch (err) {
+          console.error("Failed to fetch real status for sidebar", err);
+        }
+      }
+    };
+    fetchRealStatus();
+  }, []);
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -46,6 +64,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     setIsCollapsed(!isCollapsed);
   };
 
+  // Determine which status to display (Prefers DB fetch -> fallback to JWT Token)
+  const displayStatus = realStatus?.replace(/_/g, " ") || user?.applicationStatus?.replace(/_/g, " ") || "Pending";
 
   return (
       <>
@@ -70,17 +90,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Header: Logo & Toggle */}
           <div className="flex items-center h-20 px-4 border-b border-green-800/50 justify-between">
             {!isCollapsed ? (
-                // Full Logo
                 <div className="flex items-center space-x-3 overflow-hidden transition-opacity duration-300 opacity-100">
                   <div className="flex items-center justify-center shrink-0">
                     <Logo />
                   </div>
                   <span className="text-lg font-bold whitespace-nowrap">
-                Dashboard
-              </span>
+                    Dashboard
+                  </span>
                 </div>
             ) : (
-
                 <div className="w-full flex justify-center">
                   <span className="font-bold text-green-400 text-xl">
                     <Logo />
@@ -88,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
             )}
 
-            {/* Toggle Button (Desktop only) */}
+            {/* Toggle Button */}
             <button
                 onClick={toggleSidebar}
                 className={cn(
@@ -124,16 +142,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                           "font-medium whitespace-nowrap transition-all duration-300",
                           isCollapsed ? "hidden" : "block"
                       )}>
-                    {item.label}
-                  </span>
+                        {item.label}
+                      </span>
                     </button>
 
-                    {/* Tooltip: Displayed "on top" via z-index and absolute positioning outside the button */}
                     {isCollapsed && (
                         <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block">
                           <div className="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap relative">
                             {item.label}
-                            {/* Little triangle arrow pointing left */}
                             <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
                           </div>
                         </div>
@@ -156,7 +172,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               >
                 <div className="relative">
                   <Bell className={cn("shrink-0", isCollapsed ? "w-6 h-6" : "w-5 h-5")} />
-                  {unreadNotifications > 0 && (
+                  {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
@@ -168,17 +184,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     "font-medium whitespace-nowrap transition-all duration-300 flex-1 text-left",
                     isCollapsed ? "hidden" : "block"
                 )}>
-                Notifications
-              </span>
+                  Notifications
+                </span>
 
-                {!isCollapsed && unreadNotifications > 0 && (
+                {!isCollapsed && unreadCount > 0 && (
                     <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {unreadNotifications}
-                  </span>
+                      {unreadCount}
+                    </span>
                 )}
               </button>
 
-              {/* Tooltip for Notifications */}
               {isCollapsed && (
                   <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block">
                     <div className="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap relative">
@@ -193,20 +208,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Footer / Status & Logout */}
           <div className="p-4 border-t border-green-800/50 space-y-4">
 
-            {/* Status Section */}
-            {/* If collapsed: Icon Only (Activity) */}
-            {/* If open: Full Status Card */}
             <div className="transition-all duration-300">
               {isCollapsed ? (
                   <div className="flex justify-center group relative cursor-help">
                     <div className="p-2 rounded-lg bg-green-800/40 text-yellow-400 hover:bg-green-800/60 transition-colors">
                       <Activity className="w-6 h-6" />
                     </div>
-                    {/* Status Tooltip */}
                     <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block">
                       <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-md shadow-lg whitespace-nowrap">
                         <p className="font-semibold text-green-400 uppercase text-[10px]">Status</p>
-                        <p>{user?.applicationStatus?.replace(/_/g, " ") || "Pending"}</p>
+                        <p>{displayStatus}</p>
                       </div>
                     </div>
                   </div>
@@ -216,7 +227,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       <p className="text-xs text-green-300 uppercase font-semibold tracking-wider mb-1">Status</p>
                       <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-white truncate max-w-[140px]">
-                                {user?.applicationStatus?.replace(/_/g, " ") || "Pending"}
+                                {displayStatus}
                             </span>
                         <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
                       </div>
@@ -240,10 +251,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     "font-medium whitespace-nowrap transition-all duration-300",
                     isCollapsed ? "hidden" : "block"
                 )}>
-                Logout
-              </span>
+                  Logout
+                </span>
               </button>
-              {/* Tooltip for logout */}
               {isCollapsed && (
                   <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block">
                     <div className="bg-red-900 text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap relative">

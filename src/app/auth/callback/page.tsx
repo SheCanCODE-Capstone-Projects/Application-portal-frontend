@@ -39,7 +39,7 @@ function CallbackContent() {
 
     return (
         <AuroraBackground>
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 z-30">
+        <div className="min-h-screen flex flex-col items-center justify-center z-30">
             <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-xl shadow-sm border border-gray-100">
                 <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
                 <div className="text-center">
@@ -56,7 +56,7 @@ export default function CallbackPage() {
     return (
         <AuroraBackground>
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center z-30">
                 <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
             </div>
         }>

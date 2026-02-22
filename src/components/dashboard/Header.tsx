@@ -28,7 +28,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   useEffect(() => {
     setMounted(true);
-    const timer = setInterval(() => setCurrentDate(new Date()), 60000); // Update every minute
+    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 

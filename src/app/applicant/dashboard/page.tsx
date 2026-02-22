@@ -28,12 +28,11 @@ import {
   parseISO
 } from 'date-fns';
 
-
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { applicationService } from "@/services/application/application-service";
-import { notificationService, Notification } from "@/services/notification/notification-service";
+import { useNotifications } from "@/context/NotificationContext"; // 1. Added import
 import { Application } from "@/types/application/application";
 import { toast } from "sonner";
 
@@ -45,8 +44,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [application, setApplication] = useState<Application | null>(null);
   const [progress, setProgress] = useState(0);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState(false);
+
+  // 2. Consume shared context instead of localized fetch
+  const { notifications } = useNotifications();
 
   const today = new Date();
   const interviewDate = application?.interviewDate ? parseISO(application.interviewDate) : null;
@@ -61,7 +62,6 @@ export default function DashboardPage() {
     end: endDate,
   });
 
-  // --- THEME CONFIGURATION ---
   const STEP_THEMES = [
     { name: 'Emerald', bg: 'bg-emerald-500', text: 'text-emerald-600', stroke: '#10b981' },
     { name: 'Blue',    bg: 'bg-blue-500',    text: 'text-blue-600',    stroke: '#3b82f6' },
@@ -69,44 +69,14 @@ export default function DashboardPage() {
     { name: 'Amber',   bg: 'bg-amber-500',   text: 'text-amber-600',   stroke: '#f59e0b' },
   ];
 
-  // --- STEPS CONFIGURATION ---
-  // Using the presence of objects in your JSON to determine completion
   const steps = [
-    {
-      label: "Personal Information",
-      isComplete: !!application?.personalInfo,
-      theme: STEP_THEMES[0]
-    },
-    {
-      label: "Education & Experience",
-      isComplete: !!application?.education,
-      theme: STEP_THEMES[1]
-    },
-    {
-      label: "Motivation",
-      isComplete: !!application?.motivation,
-      theme: STEP_THEMES[2]
-    },
-    {
-      label: "Documents",
-      isComplete: (application?.documents?.length || 0) > 0,
-      theme: STEP_THEMES[3]
-    },
-    {
-      label: "Emergency Contacts",
-      isComplete: (application?.emergencyContacts?.length || 0) > 0,
-      theme: STEP_THEMES[3]
-    },
-    {
-      label: "Disability",
-      isComplete: !!application?.disability,
-      theme: STEP_THEMES[3]
-    },
-    {
-      label: "Vulnerability",
-      isComplete: !!application?.vulnerability,
-      theme: STEP_THEMES[3]
-    }
+    { label: "Personal Information", isComplete: !!application?.personalInfo, theme: STEP_THEMES[0] },
+    { label: "Education & Experience", isComplete: !!application?.education, theme: STEP_THEMES[1] },
+    { label: "Motivation", isComplete: !!application?.motivation, theme: STEP_THEMES[2] },
+    { label: "Documents", isComplete: (application?.documents?.length || 0) > 0, theme: STEP_THEMES[3] },
+    { label: "Emergency Contacts", isComplete: (application?.emergencyContacts?.length || 0) > 0, theme: STEP_THEMES[3] },
+    { label: "Disability", isComplete: !!application?.disability, theme: STEP_THEMES[3] },
+    { label: "Vulnerability", isComplete: !!application?.vulnerability, theme: STEP_THEMES[3] }
   ];
 
   useEffect(() => {
@@ -120,22 +90,14 @@ export default function DashboardPage() {
 
         await checkAuth();
 
-        const [appData, notifsData] = await Promise.all([
-          applicationService.getMyApplication(token),
-          notificationService.getUnread(token)
-        ]);
-
+        const appData = await applicationService.getMyApplication(token);
         setApplication(appData);
-        setNotifications(notifsData);
 
-        // Calculate Progress
         if (appData?.id) {
           try {
             const progressData = await applicationService.getProgress(appData.id, token);
             setProgress(progressData);
           } catch (e) {
-            console.warn("Could not fetch progress, calculating locally", e);
-
             let completed = 0;
             if (appData.personalInfo) completed++;
             if (appData.education) completed++;
@@ -150,7 +112,6 @@ export default function DashboardPage() {
           }
         }
       } catch (error) {
-        console.error("Dashboard data fetch failed:", error);
         toast.error("Failed to load dashboard data. Please refresh.");
       } finally {
         setLoading(false);
@@ -161,7 +122,6 @@ export default function DashboardPage() {
     initDashboard();
   }, [checkAuth, router]);
 
-  // --- SVG MATH ---
   const size = 200;
   const strokeWidth = 16;
   const center = size / 2;
@@ -170,7 +130,6 @@ export default function DashboardPage() {
   const gap = 3;
   const segmentLength = (circumference / steps.length) - gap;
 
-  // Small circle for stats
   const miniRadius = 28;
   const miniCircumference = 2 * Math.PI * 28;
   const miniOffset = miniCircumference - (progress / 100) * miniCircumference;
@@ -178,18 +137,14 @@ export default function DashboardPage() {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case "APPROVED":
-      case "ACCEPTED":
-        return { bg: "bg-green-100", text: "text-green-700", border: "border-green-500", icon: CheckCircle };
+      case "ACCEPTED": return { bg: "bg-green-100", text: "text-green-700", border: "border-green-500", icon: CheckCircle };
       case "PENDING":
       case "PENDING_REVIEW":
       case "UNDER_REVIEW":
-      case "SUBMITTED":
-        return { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-500", icon: Clock };
+      case "SUBMITTED": return { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-500", icon: Clock };
       case "REJECTED":
-      case "SYSTEM_REJECTED":
-        return { bg: "bg-red-100", text: "text-red-700", border: "border-red-500", icon: AlertTriangle };
-      default:
-        return { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-500", icon: AlertCircle };
+      case "SYSTEM_REJECTED": return { bg: "bg-red-100", text: "text-red-700", border: "border-red-500", icon: AlertTriangle };
+      default: return { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-500", icon: AlertCircle };
     }
   };
 
@@ -240,7 +195,6 @@ export default function DashboardPage() {
 
   return (
       <div className="space-y-6">
-        {/* Welcome, Hero Section */}
         <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-green-800 rounded-2xl shadow-xl p-8 text-white overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
@@ -286,7 +240,6 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 </div>
-                {/* Dynamic Status Icon Color */}
                 <div className={`absolute -bottom-2 -right-2 rounded-full p-2.5 border-4 border-green-800 shadow-lg ${appStatus === 'SYSTEM_REJECTED' ? 'bg-red-500' : 'bg-green-500'}`}>
                   <StatusIcon className="w-6 h-6 text-white" />
                 </div>
@@ -295,9 +248,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* 1. Application ID Card */}
           <div className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
             <div className="flex justify-between items-start mb-4 relative z-10">
@@ -326,13 +277,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 2. Cohort Card */}
           <div className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-purple-100/80 rounded-xl text-purple-600 shadow-inner">
                 <Award className="w-6 h-6" />
               </div>
-              <span className="flex h-3 w-3 relative"></span>
             </div>
             <div>
               <p className="text-gray-500 text-sm font-medium mb-1">Active Cohort</p>
@@ -345,7 +294,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 3. Progress Card */}
           <div className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium mb-1">Completion</p>
@@ -378,7 +326,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 4. Status Card */}
           <div className={`group rounded-2xl p-5 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden ${
               appStatus.includes('ACCEPTED') ? 'bg-green-50/50 border-green-100' :
                   appStatus.includes('REJECTED') ? 'bg-red-50/50 border-red-100' :
@@ -411,13 +358,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Left Column: Progress Chart & Steps */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 h-full flex flex-col">
-              {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -438,8 +382,6 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex-1 flex flex-col items-center">
-
-                {/* TOP: Segmented Wheel Chart */}
                 <div className="py-6 flex justify-center w-full mb-6">
                   <div className="relative w-56 h-56">
                     <div className="absolute inset-0 rounded-full shadow-inner bg-gray-50/50"></div>
@@ -461,15 +403,12 @@ export default function DashboardPage() {
                                 strokeLinecap="round"
                                 transform={`rotate(${rotation} ${center} ${center})`}
                                 className="transition-all duration-1000 ease-out"
-                                style={{
-                                  opacity: step.isComplete ? 1 : 0.8
-                                }}
+                                style={{ opacity: step.isComplete ? 1 : 0.8 }}
                             />
                         );
                       })}
                     </svg>
 
-                    {/* Center Stats */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">Total</span>
                       <div className="text-5xl font-extrabold text-gray-800 tracking-tight">
@@ -482,7 +421,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* BOTTOM: Detailed Breakdown Grid */}
                 <div className="w-full">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Detailed Breakdown</h4>
@@ -527,9 +465,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
-            {/* Messages & Updates */}
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 h-96 overflow-y-auto">
               <div className="flex items-center gap-3 mb-4 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
                 <div className={`p-2 rounded-xl ${appStatus === 'SYSTEM_REJECTED' ? 'bg-red-100' : 'bg-green-100'}`}>
@@ -544,8 +480,6 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
-
-                {/* 1. PRIORITY: System Rejection Message */}
                 {application?.status === 'SYSTEM_REJECTED' && (
                     <div className="bg-red-50 border-l-1 border-red-500 rounded-lg p-4 mb-3 animate-in slide-in-from-right fade-in duration-300">
                       <div className="flex items-center gap-2 mb-1">
@@ -560,40 +494,39 @@ export default function DashboardPage() {
                       </p>
                     </div>
                 )}
-
-                {/* 2. Normal Notifications */}
-                {notifications.map((notif) => (
-                    <div key={notif.id} className="bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-blue-500 rounded-lg p-4 transition-all hover:bg-blue-100">
+                {/* 2. Normal Notifications synced from Context */}
+                {notifications.slice(0, 5).map((notif) => (
+                    <div
+                        key={notif.id}
+                        className={`border-l-4 rounded-lg p-4 transition-all hover:bg-gray-50 cursor-pointer ${!notif.read ? 'bg-blue-50 border-blue-500' : 'bg-white border-gray-200'}`}
+                        onClick={() => router.push('/applicant/dashboard/notifications')}
+                    >
                       <div className="flex items-center gap-2 mb-1">
-                        <Bell className="w-4 h-4 text-blue-600" />
-                        <p className="text-sm font-semibold text-blue-900">{notif.title}</p>
+                        <Bell className={`w-4 h-4 ${!notif.read ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <p className={`text-sm ${!notif.read ? 'font-semibold text-blue-900' : 'font-medium text-gray-700'}`}>{notif.title}</p>
                       </div>
-                      <p className="text-xs text-blue-700">{notif.message}</p>
+                      <p className={`text-xs ${!notif.read ? 'text-blue-700' : 'text-gray-500'} line-clamp-2`}>{notif.message}</p>
                       <p className="text-[10px] text-gray-400 mt-2 text-right">
                         {new Date(notif.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                 ))}
 
-                {/* 3. Fallback: Application Started (Only if no other critical status) */}
                 {notifications.length === 0 && application?.status !== 'SYSTEM_REJECTED' && (
                     <div className="bg-gradient-to-r from-green-50 to-green-100/50 border-l-4 border-green-500 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <CheckCircle className="w-4 h-4 text-green-600" />
-                        <p className="text-sm font-semibold text-green-900">Application Started</p>
+                        <p className="text-sm font-semibold text-green-900">Application Details</p>
                       </div>
                       <p className="text-xs text-green-700">
-                        Your application for {application?.cohortName} has been initialized.
+                        No new updates regarding your application for {application?.cohortName}.
                       </p>
                     </div>
                 )}
               </div>
             </div>
 
-            {/* Calendar */}
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex flex-col">
-
-              {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col">
                   <h3 className="text-lg font-bold text-gray-800 capitalize">
@@ -610,7 +543,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Days Header */}
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
                     <div key={day} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400">
@@ -619,10 +551,8 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map((day, dayIdx) => {
-                  // Logic for Styles
+                {calendarDays.map((day) => {
                   const isCurrentMonth = isSameMonth(day, monthStart);
                   const isDayToday = isToday(day);
                   const isInterview = interviewDate ? isSameDay(day, interviewDate) : false;
@@ -639,13 +569,10 @@ export default function DashboardPage() {
                       >
                         {format(day, 'd')}
 
-                        {/* Dot Indicators */}
                         <div className="absolute bottom-1 flex gap-0.5">
-                          {/* Green dot for Today */}
                           {isDayToday && !isInterview && (
                               <div className="w-1 h-1 bg-green-500 rounded-full"></div>
                           )}
-                          {/* White dot if Interview is selected */}
                           {isInterview && (
                               <div className="w-1 h-1 bg-white/70 rounded-full"></div>
                           )}
@@ -655,7 +582,6 @@ export default function DashboardPage() {
                 })}
               </div>
 
-              {/* Legend / Footer */}
               <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
@@ -669,8 +595,8 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
   );
 }

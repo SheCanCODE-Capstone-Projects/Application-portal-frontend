@@ -43,7 +43,7 @@ export function useRealTimeApplication(userId: string | undefined) {
 
         // Subscribing to user-specific status updates (Accepted/Rejected/Submitted)
         const unsubStatus = subscribe(`/user/queue/notifications`, () => {
-            fetchApp(); // Refresh full application state when a notification arrives
+            fetchApp(); // Refresh full application state when a notifications arrives
         });
 
         return () => { unsubProgress(); unsubStatus(); };

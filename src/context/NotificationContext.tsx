@@ -5,16 +5,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'sonner';
 import { api } from '@/lib/api/api';
-
-export interface Notification {
-    id: string;
-    title: string;
-    message: string;
-    type: 'APPLICATION_ACCEPTED' | 'APPLICATION_REJECTED' | 'INTERVIEW_SCHEDULED' | 'GENERAL' | 'APPLICATION_SUBMITTED';
-    isRead: boolean;
-    createdAt: string;
-    applicationId?: string;
-}
+import { Notification } from '@/services/notification/notification-service';
 
 interface NotificationContextType {
     notifications: Notification[];
@@ -32,7 +23,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     const [loading, setLoading] = useState(true);
     const stompClientRef = useRef<Client | null>(null);
 
-    // 1. Fetch Initial Notifications
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem("access_token");
@@ -42,8 +32,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            // Normalize response
-            const notifications: Notification[] = Array.isArray(res.data)
+            const notificationsData: Notification[] = Array.isArray(res.data)
                 ? res.data
                 : Array.isArray(res.data?.data)
                     ? res.data.data
@@ -51,8 +40,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                         ? res.data.content
                         : [];
 
-            setNotifications(notifications);
-            setUnreadCount(notifications.filter(n => !n.isRead).length);
+            setNotifications(notificationsData);
+            // Count using the proper .read property
+            setUnreadCount(notificationsData.filter(n => !n.read).length);
         } catch (error) {
             console.error("Failed to fetch notifications", error);
         } finally {
@@ -60,26 +50,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         }
     };
 
-    // 2. Setup Real-Time WebSocket Connection
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) return;
 
         fetchNotifications();
 
-        // 1. Get Base URL
         let apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
-
-        // 2. Clean URL: Trim whitespace and remove trailing slashes
         apiUrl = apiUrl.trim().replace(/\/+$/, '');
 
-        // 3. Force HTTPS protocol if the page is loaded over HTTPS
-        // This prevents "SecurityError: An insecure SockJS connection may not be initiated..."
         if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
             apiUrl = apiUrl.replace(/^http:/i, 'https:');
         }
-
-        console.log('Notification WebSocket connecting to:', apiUrl + '/ws');
 
         const socket = new SockJS(`${apiUrl}/ws`);
 
@@ -90,7 +72,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 if (process.env.NODE_ENV === 'development') console.log('STOMP:', str);
             },
             onConnect: () => {
-                console.log("✅ Connected to Notification WebSocket");
                 client.subscribe(`/user/queue/notifications`, (message) => {
                     if (message.body) {
                         const newNotification: Notification = JSON.parse(message.body);
@@ -99,7 +80,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 });
             },
             onStompError: (frame) => {
-                console.error('❌ Broker reported error:', frame.headers['message']);
+                console.error('Broker reported error:', frame.headers['message']);
             },
         });
 
@@ -108,18 +89,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
         return () => {
             if (client.active) {
-                console.log("🔌 Deactivating Notification WebSocket");
                 client.deactivate();
             }
         };
     }, []);
 
-    // 3. Handle Incoming Notification
     const handleNewNotification = (notification: Notification) => {
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
 
-        // Visual Toast
         toast(notification.title, {
             description: notification.message,
             action: {
@@ -130,21 +108,21 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
     };
 
-    // 4. Actions
     const markAsRead = async (id: string) => {
         try {
             await api.put(`/api/v1/notifications/${id}/read`);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+            // Update mapping using .read
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
-            console.error('Failed to mark notification as read:', error);
+            console.error('Failed to mark notifications as read:', error);
         }
     };
 
     const markAllAsRead = async () => {
         try {
             await api.put(`/api/v1/notifications/read-all`);
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             setUnreadCount(0);
         } catch (error) {
             console.error('Failed to mark all as read:', error);

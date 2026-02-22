@@ -3,32 +3,38 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import {
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-    Search, CheckCheck, Trash2, MailOpen, Clock, Circle, Filter, Loader2, RefreshCw
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Search, CheckCheck, Trash2, MailOpen, Clock, Circle, Filter, Loader2,
 } from "lucide-react";
-
-import { notificationService, Notification } from "@/services/notification/notification-service";
 import { toast } from "sonner";
 
-export default function NotificationsPage() {
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+import {
+    adminNotificationService,
+    AdminNotification,
+} from "@/services/notification/notification-service";
+
+export default function AdminNotificationsPage() {
+    const [notifications, setNotifications] = useState<AdminNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
 
-    const fetchNotifications = async () => {
-        const token = localStorage.getItem("access_token");
-        if (!token) return;
+    const getToken = () => localStorage.getItem("access_token") ?? "";
 
+    const fetchNotifications = async () => {
+        const token = getToken();
+        if (!token) return;
         try {
             setLoading(true);
-            const data = await notificationService.getAll(token);
+            const data = await adminNotificationService.getAll(token);
             setNotifications(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
@@ -43,102 +49,99 @@ export default function NotificationsPage() {
     }, []);
 
     const filteredNotifications = notifications.filter((n) => {
-        const matchesSearch = (n.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-            (n.message?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === "All" ||
-            (statusFilter === "Unread" ? !n.isRead : n.isRead);
+        const matchesSearch =
+            (n.title?.toLowerCase() ?? "").includes(searchTerm.toLowerCase()) ||
+            (n.message?.toLowerCase() ?? "").includes(searchTerm.toLowerCase());
+
+        const matchesStatus =
+            statusFilter === "All" ||
+            (statusFilter === "Unread" ? !n.read : n.read);
+
         return matchesSearch && matchesStatus;
     });
 
-    const markAsRead = async (id: string) => {
-        const token = localStorage.getItem("access_token");
-        if (!token) return;
+    const unreadCount = notifications.filter((n) => !n.read).length;
 
+    const markAsRead = async (id: string) => {
+        const token = getToken();
+        if (!token) return;
         try {
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-            await notificationService.markAsRead(id, token);
+  
+            setNotifications((prev) =>
+                prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+            );
+            await adminNotificationService.markAsRead(id, token);
             toast.success("Marked as read");
-        } catch (error) {
+        } catch {
             toast.error("Failed to update status");
-            fetchNotifications();
+            fetchNotifications(); 
         }
     };
 
     const markAllAsRead = async () => {
-        const token = localStorage.getItem("access_token");
+        const token = getToken();
         if (!token) return;
-
         try {
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            // 2. Fixed method name: markAllAsRead
-            await notificationService.markAllAsRead(token);
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+            await adminNotificationService.markAllAsRead(token);
             toast.success("All notifications marked as read");
-        } catch (error) {
+        } catch {
             toast.error("Action failed");
             fetchNotifications();
         }
     };
 
-    const deleteNotification = async (id: string) => {
-        const token = localStorage.getItem("access_token");
-        if (!token) return;
-
-        if (!confirm("Are you sure you want to delete this notification?")) return;
-
-        try {
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            // 3. delete method now exists in service
-            await notificationService.delete(id, token);
-            toast.success("Notification deleted");
-        } catch (error) {
-            toast.error("Failed to delete");
-            fetchNotifications();
+    // ── Type badge colour ─────────────────────────────────────────────────────
+    const getTypeStyle = (type?: string) => {
+        switch (type?.toUpperCase()) {
+            case "APPLICATION_ACCEPTED":    return "text-green-600 bg-green-50 border-green-100";
+            case "APPLICATION_REJECTED":    return "text-red-500 bg-red-50 border-red-100";
+            case "APPLICATION_SUBMITTED":   return "text-blue-600 bg-blue-50 border-blue-100";
+            case "INTERVIEW_SCHEDULED":     return "text-purple-600 bg-purple-50 border-purple-100";
+            case "ADMIN_DAILY_SUMMARY":     return "text-orange-500 bg-orange-50 border-orange-100";
+            default:                        return "text-gray-500 bg-gray-50 border-gray-100";
         }
     };
 
-    const getTypeColor = (type?: string) => {
-        if (!type) return 'text-gray-500 bg-gray-50 border-gray-100';
-        // Handle various case sensitivities from backend
-        switch (type.toLowerCase()) {
-            case 'alert':
-            case 'error': return 'text-red-500 bg-red-50 border-red-100';
-            case 'system':
-            case 'info': return 'text-blue-500 bg-blue-50 border-blue-100';
-            case 'success': return 'text-green-500 bg-green-50 border-green-100';
-            default: return 'text-gray-500 bg-gray-50 border-gray-100';
-        }
-    };
+    const formatType = (type?: string) =>
+        type?.replace(/_/g, " ") ?? "GENERAL";
 
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="space-y-6">
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
                         Notifications
-                        {notifications.some(n => !n.isRead) && (
+                        {unreadCount > 0 && (
                             <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
                             </span>
                         )}
                     </h1>
-                    <p className="text-gray-500 mt-1">Manage system alerts and applicant updates</p>
+                    <p className="text-gray-500 mt-1">
+                        {unreadCount > 0
+                            ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
+                            : "All caught up"}
+                    </p>
                 </div>
-                <div className="flex gap-3">
-                    <Button
-                        onClick={markAllAsRead}
-                        variant="outline"
-                        className="bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
-                        disabled={loading || notifications.every(n => n.isRead)}
-                    >
-                        <CheckCheck className="mr-2 h-4 w-4" /> Mark all as read
-                    </Button>
-                </div>
+                <Button
+                    onClick={markAllAsRead}
+                    variant="outline"
+                    className="bg-white text-gray-700 hover:bg-gray-50 border-gray-200"
+                    disabled={loading || unreadCount === 0}
+                >
+                    <CheckCheck className="mr-2 h-4 w-4" />
+                    Mark all as read
+                </Button>
             </div>
 
             <Card className="border-gray-200 shadow-sm">
+                {/* Filters */}
                 <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-4 bg-white rounded-t-xl">
-                    <div className="relative group w-full sm:max-w-md">
+                    <div className="relative w-full sm:max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                             placeholder="Search notifications..."
@@ -162,11 +165,12 @@ export default function NotificationsPage() {
                     </div>
                 </div>
 
+                {/* Table */}
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-gray-50/50">
                             <TableRow className="border-gray-100">
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[36px]" />
                                 <TableHead className="font-semibold text-gray-600">Notification</TableHead>
                                 <TableHead className="font-semibold text-gray-600">Date Received</TableHead>
                                 <TableHead className="font-semibold text-gray-600">Status</TableHead>
@@ -187,44 +191,75 @@ export default function NotificationsPage() {
                                 filteredNotifications.map((n) => (
                                     <TableRow
                                         key={n.id}
-                                        className={`border-gray-100 hover:bg-gray-50/50 transition-colors ${!n.isRead ? 'bg-blue-50/30' : ''}`}
+                                        className={`border-gray-100 transition-colors hover:bg-gray-50/50 ${
+                                            !n.read ? "bg-blue-50/30" : ""
+                                        }`}
                                     >
+                                        {/* Unread dot */}
                                         <TableCell>
-                                            {!n.isRead && (
+                                            {!n.read && (
                                                 <Circle className="h-2 w-2 fill-blue-500 text-blue-500" />
                                             )}
                                         </TableCell>
+
+                                        {/* Title + message + type */}
                                         <TableCell className="py-4">
                                             <div className="flex flex-col gap-1 max-w-lg">
-                                                <span className={`text-sm ${!n.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-600'}`}>
+                                                <span
+                                                    className={`text-sm ${
+                                                        !n.read
+                                                            ? "font-bold text-gray-900"
+                                                            : "font-medium text-gray-600"
+                                                    }`}
+                                                >
                                                     {n.title}
                                                 </span>
-                                                <span className="text-xs text-gray-500 line-clamp-1">
+                                                <span className="text-xs text-gray-500 line-clamp-2">
                                                     {n.message}
                                                 </span>
                                                 {n.type && (
-                                                    <span className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded w-fit mt-1 border ${getTypeColor(n.type)}`}>
-                                                        {n.type}
+                                                    <span
+                                                        className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded w-fit mt-1 border ${getTypeStyle(n.type)}`}
+                                                    >
+                                                        {formatType(n.type)}
                                                     </span>
                                                 )}
                                             </div>
                                         </TableCell>
+
+                                        {/* Date */}
                                         <TableCell>
                                             <div className="flex items-center gap-2 text-xs text-gray-500">
                                                 <Clock className="h-3 w-3" />
-                                                {new Date(n.createdAt).toLocaleDateString()} <span className="hidden sm:inline">at {new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                {new Date(n.createdAt).toLocaleDateString()}
+                                                <span className="hidden sm:inline">
+                                                    at{" "}
+                                                    {new Date(n.createdAt).toLocaleTimeString([], {
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </span>
                                             </div>
                                         </TableCell>
+
+                                        {/* Read / Unread badge */}
                                         <TableCell>
-                                            <Badge variant="outline" className={`border-none ${
-                                                n.isRead ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600 font-bold'
-                                            }`}>
-                                                {n.isRead ? 'Read' : 'New'}
+                                            <Badge
+                                                variant="outline"
+                                                className={`border-none ${
+                                                    n.read
+                                                        ? "bg-gray-100 text-gray-500"
+                                                        : "bg-blue-100 text-blue-600 font-bold"
+                                                }`}
+                                            >
+                                                {n.read ? "Read" : "New"}
                                             </Badge>
                                         </TableCell>
+
+                                        {/* Actions */}
                                         <TableCell className="text-right">
                                             <div className="flex justify-end items-center gap-2">
-                                                {!n.isRead && (
+                                                {!n.read && (
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -235,22 +270,16 @@ export default function NotificationsPage() {
                                                         <MailOpen className="h-4 w-4" />
                                                     </Button>
                                                 )}
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => deleteNotification(n.id)}
-                                                    className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 px-2"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-40 text-center text-gray-500 italic">
+                                    <TableCell
+                                        colSpan={5}
+                                        className="h-40 text-center text-gray-500 italic"
+                                    >
                                         No notifications found.
                                     </TableCell>
                                 </TableRow>
