@@ -38,7 +38,8 @@ function CallbackContent() {
     }, [searchParams, loginWithToken, router]);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <AuroraBackground>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 z-30">
             <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-xl shadow-sm border border-gray-100">
                 <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
                 <div className="text-center">
@@ -47,6 +48,7 @@ function CallbackContent() {
                 </div>
             </div>
         </div>
+        </AuroraBackground>
     );
 }
 
