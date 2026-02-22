@@ -1,26 +1,28 @@
+// app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
 import { authService } from "@/services/auth/auth-service";
-import {RegisterFormData} from "@/types/auth/register";
+import { RegisterFormData } from "@/types/auth/register";
+import axios from "axios";
 
 export async function POST(req: Request) {
     try {
         const body: RegisterFormData = await req.json();
-
-        console.log("Register route received body:", body);
-
         const data = await authService.register(body);
-
         return NextResponse.json(data, { status: 201 });
     } catch (error) {
-        const message =
-            error instanceof Error
-                ? error.message
-                : "Registration failed";
+        // ✅ Check if it's an Axios error and dig into response.data
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message || "Registration failed";
+            const status = error.response?.status || 400;
 
-        console.error("Registration error:", message);
+            console.error("Backend error:", message);
+
+            return NextResponse.json({ message }, { status });
+        }
+
         return NextResponse.json(
-            { message },
-            { status: 400 }
+            { message: "Registration failed" },
+            { status: 500 }
         );
     }
 }

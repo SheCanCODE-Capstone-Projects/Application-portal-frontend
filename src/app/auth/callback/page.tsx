@@ -4,6 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
+import { AuroraBackground } from "@/components/background/page";
 
 function CallbackContent() {
     const router = useRouter();
@@ -51,6 +52,7 @@ function CallbackContent() {
 
 export default function CallbackPage() {
     return (
+        <AuroraBackground>
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
@@ -58,5 +60,6 @@ export default function CallbackPage() {
         }>
             <CallbackContent />
         </Suspense>
+        </AuroraBackground>
     );
 }
