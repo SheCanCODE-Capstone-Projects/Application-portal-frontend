@@ -88,3 +88,26 @@ export interface ApplicationQueryParams {
     search?: string;
     cohortId?: string;
 }
+
+// Add this to src/types/application/application.ts
+
+export interface ApplicationStepData {
+    personalInfo?: PersonalInfoDto;
+    education?: EducationDto;
+    motivation?: MotivationDto;
+    documents?: DocumentDto[];
+    emergencyContacts?: EmergencyContactDto[];
+    disability?: DisabilityDto;
+    vulnerability?: VulnerabilityDto;
+}
+
+// You might also find this union type helpful if you have a generic
+// handleNext(stepId: string, data: ApplicationStepPayload) function in your main form wrapper:
+export type ApplicationStepPayload =
+    | PersonalInfoDto
+    | EducationDto
+    | MotivationDto
+    | DocumentDto[]
+    | EmergencyContactDto[]
+    | DisabilityDto
+    | VulnerabilityDto;

@@ -17,6 +17,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { toast } from "sonner";
 import { ApplicationStatus, Application } from '@/types/application/application';
 import { AuroraBackground } from "@/components/background/page";
+import axios from "axios";
 
 export default function ApplyPage() {
     const router = useRouter();
@@ -50,16 +51,23 @@ export default function ApplyPage() {
                 }
                 setAppId(existingApp.id);
                 setApplicationData(existingApp);
-                setInitializing(false);
             } else {
                 const newApp = await applicationService.startApplication(token);
                 setAppId(newApp.id);
                 setApplicationData(newApp);
                 router.replace(`/applicant/apply?step=1&id=${newApp.id}`);
-                setInitializing(false);
             }
-        } catch (err: any) {
-            toast.error("Session error. Please log in again.");
+        } catch (error: unknown) {
+            let message = "Failed to initialize application";
+
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+
+            toast.error(message);
+        } finally {
             setInitializing(false);
         }
     }, [router]);
@@ -99,8 +107,15 @@ export default function ApplyPage() {
             const next = currentStep + 1;
             router.push(`/applicant/apply?step=${next}&id=${appId}`);
             window.scrollTo(0, 0);
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || "Failed to save information";
+        } catch (err: unknown) {
+            let errorMsg = "Failed to save information";
+
+            if (axios.isAxiosError(err)) {
+                errorMsg = err.response?.data?.message || errorMsg;
+            } else if (err instanceof Error) {
+                errorMsg = err.message;
+            }
+
             toast.error(errorMsg);
         } finally {
             setSaving(false);
@@ -124,9 +139,14 @@ export default function ApplyPage() {
             await checkAuth();
             toast.success("Application submitted successfully!");
             router.push('/applicant/dashboard?submitted=true');
-        } catch (err: any) {
-            const msg = err.response?.data?.message || "Submission failed";
-            toast.error(msg);
+        } catch (err: unknown) {
+            let errorMsg = "Failed to submit application";
+            if (axios.isAxiosError(err)) {
+                errorMsg = err.response?.data?.message || errorMsg;
+            } else if (err instanceof Error) {
+                errorMsg = err.message;
+            }
+            toast.error(errorMsg);
         } finally {
             setSaving(false);
         }

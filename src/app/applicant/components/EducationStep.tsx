@@ -13,28 +13,31 @@ const educationSchema = z.object({
   yearsExperience: z.number().min(0, "Experience cannot be negative"),
 });
 
-export default function EducationStep({ initialData, onNext, onBack, saving }: any) {
-  const [data, setData] = useState<EducationDto>({
-    highestEducationLevel: "BACHELOR",
-    highestEducation: "",
-    occupation: "",
-    employmentStatus: "UNEMPLOYED",
-    yearsExperience: 0
-  });
+interface EducationStepProps {
+  initialData?: EducationDto;
+  onNext: (data: EducationDto) => void;
+  onBack: () => void;
+  saving: boolean;
+}
+
+export default function EducationStep({ initialData, onNext, onBack, saving }: EducationStepProps) {
+  const [data, setData] = useState<EducationDto>(
+    initialData || {
+      highestEducationLevel: "BACHELOR",
+      highestEducation: "",
+      occupation: "",
+      employmentStatus: "UNEMPLOYED",
+      yearsExperience: 0
+    }
+  );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (initialData) {
-      setData((prev) => ({ ...prev, ...initialData }));
-    }
-  }, [initialData]);
 
   const handleSubmit = () => {
     const result = educationSchema.safeParse(data);
     if (!result.success) {
-      const fieldErrors: any = result.error.flatten().fieldErrors;
-      setErrors(Object.keys(fieldErrors).reduce((acc: any, key) => {
+      const fieldErrors = result.error.flatten().fieldErrors as Record<string, string[]>;
+      setErrors(Object.keys(fieldErrors).reduce((acc: Record<string, string>, key) => {
         acc[key] = fieldErrors[key][0];
         return acc;
       }, {}));
@@ -55,7 +58,7 @@ export default function EducationStep({ initialData, onNext, onBack, saving }: a
             <select
                 className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                 value={data.highestEducationLevel}
-                onChange={e => setData({...data, highestEducationLevel: e.target.value as any})}
+                onChange={e => setData({...data, highestEducationLevel: e.target.value as EducationDto['highestEducationLevel']})}
             >
               <option value="PRIMARY">Primary School</option>
               <option value="SECONDARY">Secondary School</option>

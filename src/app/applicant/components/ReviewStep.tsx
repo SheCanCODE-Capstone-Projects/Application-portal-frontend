@@ -84,7 +84,7 @@ export default function ReviewStep({ onSubmit, onBack, saving, goToStep }: Revie
     vulnerability
   } = appData;
 
-  const SectionHeader = ({ icon: Icon, title, step }: { icon: any, title: string, step?: number }) => (
+  const SectionHeader = ({ icon: Icon, title, step }: { icon: React.ComponentType<{ className?: string }>, title: string, step?: number }) => (
       <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2 mt-8 first:mt-0">
         <div className="flex items-center gap-2">
           <div className="bg-emerald-100 p-2 rounded-lg">

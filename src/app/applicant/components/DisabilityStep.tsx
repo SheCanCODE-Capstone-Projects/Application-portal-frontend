@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertCircle, ArrowRight, ArrowLeft, Loader2, Accessibility } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Accessibility } from "lucide-react";
 import { DisabilityDto } from "@/types/application/application";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,24 +15,32 @@ const schema = z.object({
     path: ["disabilityType"]
 });
 
-export default function DisabilityStep({ initialData, onNext, onBack, saving }: any) {
-    const [data, setData] = useState<DisabilityDto>({
-        hasDisability: false,
-        disabilityType: "",
-        disabilityDescription: ""
-    });
-    const [errors, setErrors] = useState<Record<string, string>>({});
+interface DisabilityStepProps {
+    initialData?: DisabilityDto;
+    onNext: (data: DisabilityDto) => void;
+    onBack: () => void;
+    saving: boolean;
+}
 
-    useEffect(() => {
-        if (initialData) setData({ ...data, ...initialData });
-    }, [initialData]);
+export default function DisabilityStep({ initialData, onNext, onBack, saving }: DisabilityStepProps) {
+    const [data, setData] = useState<DisabilityDto>(
+        initialData || {
+            hasDisability: false,
+            disabilityType: "",
+            disabilityDescription: ""
+        }
+    );
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleSubmit = () => {
         const result = schema.safeParse(data);
         if (!result.success) {
-            const fieldErrors: any = result.error.flatten().fieldErrors;
-            setErrors(Object.keys(fieldErrors).reduce((acc: any, key) => {
-                acc[key] = fieldErrors[key][0];
+            const fieldErrors = result.error.flatten().fieldErrors;
+            setErrors(Object.keys(fieldErrors).reduce((acc: Record<string, string>, key) => {
+                const messages = fieldErrors[key as keyof typeof fieldErrors];
+                if (messages && messages.length > 0) {
+                    acc[key] = messages[0];
+                }
                 return acc;
             }, {}));
             toast.error("Please review the fields.");

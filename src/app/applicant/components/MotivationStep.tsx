@@ -6,24 +6,26 @@ import { MessageSquare, Target, ArrowRight, ArrowLeft, Loader2 } from "lucide-re
 import { toast } from "sonner";
 import { MotivationDto } from "@/types/application/application";
 
+interface MotivationStepProps {
+    initialData?: MotivationDto;
+    onNext: (data: MotivationDto) => void;
+    onBack: () => void;
+    saving: boolean;
+}
+
 // --- Standardized Design Classes ---
 // Matches the professional style of PersonalInfoStep and EducationStep
 const inputClass = "w-full p-5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-gray-400 text-slate-700 shadow-sm hover:border-emerald-300 resize-none leading-relaxed";
 const labelClass = "text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2 mb-3";
 
-export default function MotivationStep({ initialData, onNext, onBack, saving }: any) {
-    const [data, setData] = useState<MotivationDto>({
-        whyJoin: "",
-        futureGoals: "",
-        preferredCourse: ""
-    });
-
-    // FIX: Load initial data when component mounts so the text "returns"
-    useEffect(() => {
-        if (initialData) {
-            setData((prev) => ({ ...prev, ...initialData }));
+export default function MotivationStep({ initialData, onNext, onBack, saving }: MotivationStepProps) {
+    const [data, setData] = useState<MotivationDto>(
+        initialData || {
+            whyJoin: "",
+            futureGoals: "",
+            preferredCourse: ""
         }
-    }, [initialData]);
+    );
 
     const handleSubmit = () => {
         if (!data.whyJoin || data.whyJoin.length < 20) {

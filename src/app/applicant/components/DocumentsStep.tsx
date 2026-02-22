@@ -1,20 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FileText, ArrowRight, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { DocumentDto } from "@/types/application/application";
 import { toast } from "sonner";
 
-export default function DocumentsStep({ initialData, onNext, onBack, saving }: any) {
-    const [docs, setDocs] = useState<DocumentDto[]>([
-        { docType: "NATIONAL_ID", fileUrl: "" }
-    ]);
+interface DocumentsStepProps {
+    initialData?: DocumentDto[];
+    onNext: (docs: DocumentDto[]) => void;
+    onBack: () => void;
+    saving: boolean;
+}
 
-    useEffect(() => {
-        if (initialData && initialData.length > 0) {
-            setDocs(initialData);
-        }
-    }, [initialData]);
+export default function DocumentsStep({ initialData, onNext, onBack, saving }: DocumentsStepProps) {
+    const [docs, setDocs] = useState<DocumentDto[]>(
+        initialData && initialData.length > 0 ? initialData : [
+            { docType: "NATIONAL_ID", fileUrl: "" }
+        ]
+    );
 
     const docTypes = ["NATIONAL_ID", "DEGREE_CERTIFICATE", "TRANSCRIPT", "CV", "OTHER"];
 
