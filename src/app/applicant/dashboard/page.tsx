@@ -552,8 +552,9 @@ export default function DashboardPage() {
 
               {/* Days Header */}
               <div className="grid grid-cols-7 gap-1 mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                    <div key={day} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400">
+                {/* Added 'index' to the map function and changed the key */}
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                    <div key={`day-${index}`} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400">
                       {day}
                     </div>
                 ))}
