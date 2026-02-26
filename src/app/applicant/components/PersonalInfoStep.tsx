@@ -145,6 +145,7 @@ export default function PersonalInfoStep({
                           : "border-gray-200 focus:ring-emerald-500 focus:border-emerald-500"
                   }`}
                   value={data.fullName}
+                  placeholder="Enter your full name"
                   onChange={(e) => {
                     setData({ ...data, fullName: e.target.value });
                     setErrors({ ...errors, fullName: "" });
@@ -167,6 +168,7 @@ export default function PersonalInfoStep({
                           : "border-gray-200 focus:ring-emerald-500 focus:border-emerald-500"
                   }`}
                   value={data.email}
+                  placeholder="Enter your email"
                   onChange={(e) => {
                     setData({ ...data, email: e.target.value });
                     setErrors({ ...errors, email: "" });
@@ -207,6 +209,7 @@ export default function PersonalInfoStep({
                             : "border-gray-200 focus:ring-emerald-500 focus:border-emerald-500"
                     }`}
                     value={phoneNumber}
+                    placeholder="Enter your phone number"
                     onChange={(e) => {
                       setPhoneNumber(e.target.value.replace(/[^0-9]/g, ""));
                       setErrors({ ...errors, phone: "" });
@@ -289,6 +292,7 @@ export default function PersonalInfoStep({
               <input
                   className={`${inputBase} border-gray-200 focus:ring-emerald-500`}
                   value={data.socialLinks || ""}
+                  placeholder="Enter your LinkedIn & GitHubb or portfolio URL"
                   onChange={(e) =>
                       setData({ ...data, socialLinks: e.target.value })
                   }
@@ -304,6 +308,7 @@ export default function PersonalInfoStep({
                   rows={4}
                   className="w-full min-h-[120px] px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm sm:text-base"
                   value={data.additionalInformation || ""}
+                  placeholder="Enter any additional information you'd like to share"
                   onChange={(e) =>
                       setData({
                         ...data,
