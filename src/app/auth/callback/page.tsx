@@ -19,17 +19,13 @@ function CallbackContent() {
             if (token) {
                 try {
                     await loginWithToken(token);
-
                 } catch (err: unknown) {
-
                     console.error("Google login processing failed:", err);
                     router.push("/login?error=auth_failed");
                 }
             } else if (error) {
-
                 router.push(`/login?error=${error}`);
             } else {
-
                 router.push("/login");
             }
         };
@@ -38,30 +34,36 @@ function CallbackContent() {
     }, [searchParams, loginWithToken, router]);
 
     return (
-        <AuroraBackground>
-        <div className="min-h-screen flex flex-col items-center justify-center z-30">
+        <div className="relative z-30 min-h-screen flex flex-col items-center justify-center">
             <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-xl shadow-sm border border-gray-100">
                 <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
                 <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-800">Authenticating</h3>
-                    <p className="text-gray-500 text-sm">Verifying your Google credentials...</p>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                        Authenticating
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                        Verifying your Google credentials...
+                    </p>
                 </div>
             </div>
         </div>
-        </AuroraBackground>
     );
 }
 
 export default function CallbackPage() {
     return (
         <AuroraBackground>
-        <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center z-30">
-                <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
+            <div className="relative min-h-screen w-full">
+                <Suspense
+                    fallback={
+                        <div className="min-h-screen flex items-center justify-center z-30">
+                            <Loader2 className="h-10 w-10 animate-spin text-[#0f5d3f]" />
+                        </div>
+                    }
+                >
+                    <CallbackContent />
+                </Suspense>
             </div>
-        }>
-            <CallbackContent />
-        </Suspense>
         </AuroraBackground>
     );
 }
