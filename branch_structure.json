@@ -1,0 +1,18 @@
+{
+  "default_branch": "Production",
+  "branches": [
+    "Production",
+    "impove",
+    "origin"
+  ],
+  "parent": {
+    "Production": null,
+    "impove": "Production",
+    "origin": "Production"
+  },
+  "order": [
+    "Production",
+    "impove",
+    "origin"
+  ]
+}
